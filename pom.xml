@@ -19,22 +19,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>com.google.cloud.dataflow</groupId>
-    <artifactId>google-cloud-dataflow-java-sdk-parent</artifactId>
-    <version>1.1.0</version>
-  </parent>
 
-  <groupId>com.google.cloud.dataflow</groupId>
-  <artifactId>google-cloud-dataflow-java-examples-all</artifactId>
-  <name>Google Cloud Dataflow Java Examples - All</name>
-  <description>Google Cloud Dataflow Java SDK provides a simple, Java-based
-    interface for processing virtually any size data using Google cloud
-    resources. This artifact includes all Dataflow Java SDK
-    examples.</description>
-  <url>http://cloud.google.com/dataflow</url>
+  <groupId>com.acacia.dataflow</groupId>
+  <artifactId>dataflow-pipelines</artifactId>
 
-  <version>manual_build</version>
+  <version>0.1-SNAPSHOT</version>
 
   <packaging>jar</packaging>
 

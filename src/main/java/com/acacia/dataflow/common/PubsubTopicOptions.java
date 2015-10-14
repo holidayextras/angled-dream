@@ -12,9 +12,8 @@
  * the License.
  */
 
-package com.acacia.dataflowtest.common;
+package com.acacia.dataflow.common;
 
-import com.google.api.services.bigquery.model.TableSchema;
 import com.google.cloud.dataflow.sdk.options.DataflowPipelineOptions;
 import com.google.cloud.dataflow.sdk.options.Default;
 import com.google.cloud.dataflow.sdk.options.DefaultValueFactory;
@@ -22,32 +21,29 @@ import com.google.cloud.dataflow.sdk.options.Description;
 import com.google.cloud.dataflow.sdk.options.PipelineOptions;
 
 /**
- * Options that can be used to configure BigQuery tables in Dataflow examples.
- * The project defaults to the project being used to run the example.
+ * Options that can be used to configure Pub/Sub topic in Dataflow examples.
  */
-public interface ExampleBigQueryTableOptions extends DataflowPipelineOptions {
-  @Description("BigQuery dataset name")
-  @Default.String("dataflow_examples")
-  String getBigQueryDataset();
-  void setBigQueryDataset(String dataset);
+public interface PubsubTopicOptions extends DataflowPipelineOptions {
+  @Description("Pub/Sub topic")
+  @Default.InstanceFactory(PubsubTopicFactory.class)
+  String getPubsubTopic();
+  void setPubsubTopic(String topic);
 
-  @Description("BigQuery table name")
-  @Default.InstanceFactory(BigQueryTableFactory.class)
-  String getBigQueryTable();
-  void setBigQueryTable(String table);
-
-  @Description("BigQuery table schema")
-  TableSchema getBigQuerySchema();
-  void setBigQuerySchema(TableSchema schema);
+  @Description("Number of workers to use when executing the injector pipeline")
+  @Default.Integer(1)
+  int getInjectorNumWorkers();
+  void setInjectorNumWorkers(int numWorkers);
 
   /**
-   * Returns the job name as the default BigQuery table name.
+   * Returns a default Pub/Sub topic based on the project and the job names.
    */
-  static class BigQueryTableFactory implements DefaultValueFactory<String> {
+  static class PubsubTopicFactory implements DefaultValueFactory<String> {
     @Override
     public String create(PipelineOptions options) {
-      return options.as(DataflowPipelineOptions.class).getJobName()
-          .replace('-', '_');
+      DataflowPipelineOptions dataflowPipelineOptions =
+          options.as(DataflowPipelineOptions.class);
+      return "projects/" + dataflowPipelineOptions.getProject()
+          + "/topics/" + dataflowPipelineOptions.getJobName();
     }
   }
 }
