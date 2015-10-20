@@ -14,11 +14,7 @@
 
 package com.acacia.dataflow.common;
 
-import com.google.cloud.dataflow.sdk.options.DataflowPipelineOptions;
-import com.google.cloud.dataflow.sdk.options.Default;
-import com.google.cloud.dataflow.sdk.options.DefaultValueFactory;
-import com.google.cloud.dataflow.sdk.options.Description;
-import com.google.cloud.dataflow.sdk.options.PipelineOptions;
+import com.google.cloud.dataflow.sdk.options.*;
 
 /**
  * Options that can be used to configure Pub/Sub topic in Dataflow examples.
@@ -26,6 +22,7 @@ import com.google.cloud.dataflow.sdk.options.PipelineOptions;
 public interface PubsubTopicOptions extends DataflowPipelineOptions {
   @Description("Pub/Sub topic")
   @Default.InstanceFactory(PubsubTopicFactory.class)
+  @Validation.Required
   String getPubsubTopic();
   void setPubsubTopic(String topic);
 

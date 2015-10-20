@@ -16,13 +16,13 @@
 
 package com.acacia.dataflow;
 
-import com.acacia.dataflow.common.DataflowUtils;
-import com.acacia.dataflow.common.MultiWrite;
-import com.acacia.dataflow.common.PipelineComposerOptions;
+import com.acacia.dataflow.common.*;
+import com.acacia.scaffolding.ITransformFactory;
+import com.acacia.scaffolding.Transform;
+import com.google.api.client.util.Lists;
 import com.google.api.services.bigquery.model.TableFieldSchema;
 import com.google.api.services.bigquery.model.TableRow;
 import com.google.api.services.bigquery.model.TableSchema;
-import com.acacia.dataflow.common.PubsubTopicOptions;
 import com.google.cloud.dataflow.sdk.Pipeline;
 import com.google.cloud.dataflow.sdk.PipelineResult;
 import com.google.cloud.dataflow.sdk.io.PubsubIO;
@@ -30,85 +30,167 @@ import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipelineRunner;
 import com.google.cloud.dataflow.sdk.transforms.DoFn;
 import com.google.cloud.dataflow.sdk.transforms.ParDo;
+import com.google.common.collect.Iterables;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
- *
- *
  * <p>This pipeline example reads lines of text from a PubSub topic, splits each line
  * into individual words, capitalizes those words, and writes the output to
  * a BigQuery table.
- *
+ * <p>
  * <p>By default, the example will inject the data from the the Pub/Sub {@literal --pubsubTopic}.
  * It will make it available for the streaming pipeline to process.
- *
  */
 public class AppendExtract {
 
 
-  /** A DoFn that uppercases a word. */
-  static class Append extends DoFn<String, String> {
-    @Override
-    public void processElement(ProcessContext c) {
-      c.output(c.element() + "w00t");
-    }
-  }
+    static URLClassLoader classloader;
 
+    /**
+     * A DoFn that uppercases a word.
+     */
+    static class Append extends DoFn<String, String> {
+        @Override
+        public void processElement(ProcessContext c) {
+            c.output(c.element() + "w00t");
+        }
+    }
 
 
     /**
+     * Options supported by {@link AppendExtract}.
+     * <p>
+     * <p>Inherits standard configuration options.
+     */
+    private interface ComposerManagerOptions
+            extends PubsubTopicOptions, PipelineComposerOptions {
+    }
 
-  }
-
-  /**
-   * Options supported by {@link AppendExtract}.
-   *
-   * <p>Inherits standard configuration options.
-   */
-  private interface ComposerManagerOptions
-      extends PubsubTopicOptions, PipelineComposerOptions {
-  }
-
-  /**
-   * Sets up and starts streaming pipeline.
-   *
-   * @throws IOException if there is a problem setting up resources
-   */
-  public static void main(String[] args) throws IOException {
-    ComposerManagerOptions options = PipelineOptionsFactory.fromArgs(args)
-        .withValidation()
-        .as(ComposerManagerOptions.class);
-      options.setStreaming(true);
-      options.setPubsubTopic("projects/hx-test/topics/data-topic");
-    // In order to cancel the pipelines automatically,
-    // {@literal DataflowPipelineRunner} is forced to be used.
-      options.setRunner(DataflowPipelineRunner.class);
-      options.setMaxNumWorkers(1);
-      options.setNumWorkers(1);
-      options.setWorkerMachineType("n1-standard-1");
-
-      String[] outputTopics = options.getOutputTopics().split(",");
-      String[] executionPipelineClasses = options.getExecutionPipelineClasses().split(",");
-
-      DataflowUtils dataflowUtils = new DataflowUtils(options);
-      dataflowUtils.setup();
+    /**
+     * Sets up and starts streaming pipeline.
+     *
+     * @throws IOException if there is a problem setting up resources
+     */
+    public static void main(String[] args) throws IOException {
 
 
+        ComposerManagerOptions options = PipelineOptionsFactory.fromArgs(args)
+                .withValidation()
+                .as(ComposerManagerOptions.class);
+        options.setStreaming(true);
+        // In order to cancel the pipelines automatically,
+        // {@literal DataflowPipelineRunner} is forced to be used.
+        options.setRunner(DataflowPipelineRunner.class);
+        options.setMaxNumWorkers(1);
+        options.setNumWorkers(1);
+        options.setWorkerMachineType("n1-standard-1");
+
+        List<String> stagingFiles = Lists.newArrayList(Arrays.asList(options.getExternalFiles().split(",")));
+
+        //shouldn't be necessary -- google uploads classpath automatically
+        //options.setFilesToStage(stageFiles(stagingFiles));
+
+        List<String> outputTopics = Arrays.asList(options.getOutputTopics().split(","));
+        List<String> executionPipelineClasses = Arrays.asList(options.getExecutionPipelineClasses().split(","));
 
 
-      //need to setup error topic too
-      //derived from unique name?
+        //List<Class<?>> transforms = getAllClasses(executionPipelineClasses, stagingFiles);
 
-      Pipeline pipeline = Pipeline.create(options);
-      pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
-              .apply(ParDo.of(new Append()))
-      .apply(MultiWrite.topics(Arrays.asList(outputTopics)));
+        List<Class<?>> transforms = new ArrayList<>();
 
-       PipelineResult result = pipeline.run();
+        DataflowUtils dataflowUtils = new DataflowUtils(options);
+        dataflowUtils.setup();
 
-  }
+
+        //NOTE -- ALWAYS BUNDLE DEPENDENCIES IN CLASS JARS
+
+        String errorPipeline = "projects/" + options.getProject()
+                + "/topics/" + options.getJobName() + "/error";
+
+        ServiceLoader<ITransformFactory> loader = null;
+        //loader = ServiceLoader.load(ITransformFactory.class,classloader);
+
+
+
+
+        loader = ServiceLoader.load(ITransformFactory.class, ClassLoader.getSystemClassLoader());
+        Iterator<ITransformFactory> transformsf = loader.iterator();
+        while (transformsf.hasNext()) {
+
+            ITransformFactory f =  transformsf.next();
+            Transform t = f.createTransform();
+            if(executionPipelineClasses.contains(f.getClass().getCanonicalName())) {
+                System.out.println("Loading: " + f.getClass().getCanonicalName());
+            }
+
+        }
+
+        //NOTE: to get this working, we need to include computation jars in the classpath. ew.
+
+        Pipeline pipeline = Pipeline.create(options);
+
+        //need to support more than ParDo.of in scaffolding
+
+        pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
+
+                .apply(new MultiTransform(transforms))
+                //.apply(ParDo.of(new Append()));
+                .apply(MultiWrite.topics(outputTopics));
+
+
+
+        PipelineResult result = pipeline.run();
+
+    }
+
+    public static List<String> stageFiles(List<String> externalFiles) {
+
+        List<String> newFiles = new ArrayList<>();
+        newFiles.addAll(externalFiles);
+        newFiles.addAll(detectClassPathResourcesToStage(
+                DataflowPipelineRunner.class.getClassLoader()));
+
+        return newFiles;
+
+    }
+
+
+    /**
+     * Attempts to detect all the resources the class loader has access to. This does not recurse
+     * to class loader parents stopping it from pulling in resources from the system class loader.
+     *
+     * @param classLoader The URLClassLoader to use to detect resources to stage.
+     * @return A list of absolute paths to the resources the class loader uses.
+     * @throws IllegalArgumentException If either the class loader is not a URLClassLoader or one
+     *                                  of the resources the class loader exposes is not a file resource.
+     */
+    protected static List<String> detectClassPathResourcesToStage(ClassLoader classLoader) {
+        if (!(classLoader instanceof URLClassLoader)) {
+            String message = String.format("Unable to use ClassLoader to detect classpath elements. "
+                    + "Current ClassLoader is %s, only URLClassLoaders are supported.", classLoader);
+            throw new IllegalArgumentException(message);
+        }
+        List<String> files = new ArrayList<>();
+        for (URL url : ((URLClassLoader) classLoader).getURLs()) {
+            try {
+                files.add(new File(url.toURI()).getAbsolutePath());
+            } catch (IllegalArgumentException | URISyntaxException e) {
+                String message = String.format("Unable to convert url (%s) to file.", url);
+
+                throw new IllegalArgumentException(message, e);
+            }
+        }
+        return files;
+    }
+
 
 }
