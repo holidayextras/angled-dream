@@ -98,9 +98,14 @@
     <dependency>
       <groupId>com.acacia.scaffolding</groupId>
       <artifactId>scaffolding</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <version>0.1-ALPHA</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.python</groupId>
+      <artifactId>jython</artifactId>
+      <version>2.7.1b2</version>
+    </dependency>
 
     <dependency>
       <groupId>com.google.auto.service</groupId>

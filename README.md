@@ -1,6 +1,4 @@
 # angled-dream
 PubSub -> Cloud Dataflow Pipeline Orchestration
 
-mvn compile exec:java -Dexec.mainClass=com.acacia.dataflow.AppendExtract -Dexec.args="--stagingLocation=gs://hx-test/staging --project=hx-test"
-
-
+NOTE: need to write a script to manually build classpath so we can include all the component jars people build
