@@ -28,12 +28,12 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollection<
         PCollection<String> tmp = item;
         loader = ServiceLoader.load(ITransformFactory.class);
 
-        JythonFactory jf = JythonFactory.getInstance();
-        ITransformFactory tf = (ITransformFactory) jf.getJythonObject(
-                "com.acacia.scaffolding.ITransformFactory", "/home/bradford/proj/pypipes/acacia-common/__init__.py");
-        Transform  pytrans= tf.createTransform();
+//        JythonFactory jf = JythonFactory.getInstance();
+//        ITransformFactory tf = (ITransformFactory) jf.getJythonObject(
+//                "com.acacia.scaffolding.ITransformFactory", "/home/bradford/proj/pypipes/acacia-common/__init__.py");
+//        Transform  pytrans= tf.createTransform();
 
-        tmp = tmp.apply(ParDo.named(tmp.getName()).of(pytrans));
+//        tmp = tmp.apply(ParDo.named(tmp.getName()).of(pytrans));
 
         Iterator<ITransformFactory> transforms = loader.iterator();
         while (transforms.hasNext()) {

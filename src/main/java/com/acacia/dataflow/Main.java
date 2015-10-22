@@ -23,6 +23,7 @@ import com.google.api.client.util.Lists;
 import com.google.cloud.dataflow.sdk.Pipeline;
 import com.google.cloud.dataflow.sdk.PipelineResult;
 import com.google.cloud.dataflow.sdk.io.PubsubIO;
+import com.google.cloud.dataflow.sdk.io.Read;
 import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipelineRunner;
 import com.google.cloud.dataflow.sdk.transforms.DoFn;
@@ -55,15 +56,6 @@ public class Main {
         }
     }
 
-
-    /**
-     * Options supported by {@link Main}.
-     * <p>
-     * <p>Inherits standard configuration options.
-     */
-    private interface ComposerManagerOptions
-            extends PubsubTopicOptions, PipelineComposerOptions {
-    }
 
     /**
      * Sets up and starts streaming pipeline.
@@ -111,14 +103,11 @@ public class Main {
 
 
         //jythontest
-
-        JythonFactory jf = JythonFactory.getInstance();
-        ITransformFactory tf = (ITransformFactory) jf.getJythonObject(
-                "com.acacia.scaffolding.ITransformFactory", "/home/bradford/proj/pypipes/acacia-common/__init__.py");
-        Transform  pytrans= tf.createTransform();
-
-
-
+//
+//        JythonFactory jf = JythonFactory.getInstance();
+//        ITransformFactory tf = (ITransformFactory) jf.getJythonObject(
+//                "com.acacia.scaffolding.ITransformFactory", "/home/bradford/proj/pypipes/acacia-common/__init__.py");
+//        Transform  pytrans= tf.createTransform();
 
         loader = ServiceLoader.load(ITransformFactory.class, ClassLoader.getSystemClassLoader());
         Iterator<ITransformFactory> transformsf = loader.iterator();
@@ -144,7 +133,6 @@ public class Main {
                 .apply(new MultiTransform(transforms))
                 //.apply(ParDo.of(new Append()));
                 .apply(MultiWrite.topics(outputTopics));
-
 
 
         PipelineResult result = pipeline.run();
