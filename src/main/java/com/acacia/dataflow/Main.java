@@ -25,6 +25,7 @@ import com.google.cloud.dataflow.sdk.PipelineResult;
 import com.google.cloud.dataflow.sdk.io.PubsubIO;
 import com.google.cloud.dataflow.sdk.io.Read;
 import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
+import com.google.cloud.dataflow.sdk.runners.DataflowPipeline;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipelineRunner;
 import com.google.cloud.dataflow.sdk.transforms.DoFn;
 import com.google.cloud.dataflow.sdk.transforms.ParDo;
@@ -124,7 +125,7 @@ public class Main {
 
         //NOTE: to get this working, we need to include computation jars in the classpath. ew.
 
-        Pipeline pipeline = Pipeline.create(options);
+        Pipeline pipeline = DataflowPipeline.create(options);
 
         //need to support more than ParDo.of in scaffolding
 

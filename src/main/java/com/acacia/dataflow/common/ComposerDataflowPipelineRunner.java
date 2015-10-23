@@ -27,6 +27,8 @@ public class ComposerDataflowPipelineRunner extends DataflowPipelineRunner {
     /**
      * Applies the given transform to the input. For transforms with customized definitions
      * for the Dataflow pipeline runner, the application is intercepted and modified here.
+     *
+     * We override this because we don't want to invoke the UnsupportedStreamingIO.class or whatever that prevents boudned output from unbounded input
      */
     @Override
     public <OutputT extends POutput, InputT extends PInput> OutputT apply(
