@@ -19,6 +19,7 @@ package com.acacia.dataflow;
 import com.acacia.dataflow.common.*;
 import com.acacia.scaffolding.AbstractTransform;
 
+import com.acacia.scaffolding.AbstractTransformComposer;
 import com.google.api.client.util.Lists;
 import com.google.cloud.dataflow.sdk.Pipeline;
 import com.google.cloud.dataflow.sdk.PipelineResult;
@@ -29,6 +30,7 @@ import com.google.cloud.dataflow.sdk.runners.DataflowPipeline;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipelineRunner;
 import com.google.cloud.dataflow.sdk.transforms.DoFn;
 import com.google.cloud.dataflow.sdk.transforms.ParDo;
+import org.apache.avro.generic.GenericData;
 
 import java.io.IOException;
 import java.net.URLClassLoader;
@@ -60,6 +62,8 @@ public class Main {
 
     /**
      * Sets up and starts streaming pipeline.
+     *
+     * NOTE: needs to take some kind of exectution graph as an argument? paths to oooo
      *
      * @throws IOException if there is a problem setting up resources
      */
@@ -99,8 +103,10 @@ public class Main {
         String errorPipeline = "projects/" + options.getProject()
                 + "/topics/" + options.getJobName() + "/error";
 
-        ServiceLoader<AbstractTransform> loader = null;
-        loader = ServiceLoader.load(AbstractTransform.class, ClassLoader.getSystemClassLoader());
+        ServiceLoader<AbstractTransformComposer> loader = null;
+        loader = ServiceLoader.load(AbstractTransformComposer.class, ClassLoader.getSystemClassLoader());
+
+        List<AbstractTransformComposer> transformComposers = new ArrayList<>();
 
 
         //jythontest
@@ -109,13 +115,22 @@ public class Main {
         AbstractTransform tf = (AbstractTransform) jf.getJythonObject(
                 "com.acacia.scaffolding.AbstractTransform","~/proj/pypipes/acacia-common/__init__.py");
 
-       Iterator<AbstractTransform> transformsf = loader.iterator();
+       Iterator<AbstractTransformComposer> transformsf = loader.iterator();
+
         while (transformsf.hasNext()) {
 
-            AbstractTransform t  =  transformsf.next();
-            System.out.println("Examining: " + t.getClass().getCanonicalName());
-            if(executionPipelineClasses.contains(t.getClass().getCanonicalName())) {
-                System.out.println("Loading: " + t.getClass().getCanonicalName());
+            AbstractTransformComposer c = transformsf.next();
+
+            transformComposers.add(c);
+
+            for (AbstractTransform t : c.getOrderedTransforms()) {
+
+
+                System.out.println("Examining: " + t.getClass().getCanonicalName());
+                if (executionPipelineClasses.contains(t.getClass().getCanonicalName())) {
+                    System.out.println("Loading: " + t.getClass().getCanonicalName());
+                }
+
             }
 
         }
@@ -128,7 +143,7 @@ public class Main {
 
         pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
 
-                .apply(new MultiTransform(transforms))
+                .apply(new MultiTransform())
                 //.apply(ParDo.of(new Append()));
                 .apply(MultiWrite.topics(outputTopics));
 
