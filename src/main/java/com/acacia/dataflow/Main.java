@@ -17,8 +17,8 @@
 package com.acacia.dataflow;
 
 import com.acacia.dataflow.common.*;
-import com.acacia.scaffolding.ITransformFactory;
-import com.acacia.scaffolding.Transform;
+import com.acacia.scaffolding.AbstractTransform;
+
 import com.google.api.client.util.Lists;
 import com.google.cloud.dataflow.sdk.Pipeline;
 import com.google.cloud.dataflow.sdk.PipelineResult;
@@ -99,29 +99,26 @@ public class Main {
         String errorPipeline = "projects/" + options.getProject()
                 + "/topics/" + options.getJobName() + "/error";
 
-      //  ServiceLoader<ITransformFactory> loader = null;
-        //loader = ServiceLoader.load(ITransformFactory.class,classloader);
+        ServiceLoader<AbstractTransform> loader = null;
+        loader = ServiceLoader.load(AbstractTransform.class, ClassLoader.getSystemClassLoader());
 
 
         //jythontest
 
         JythonFactory jf = JythonFactory.getInstance();
-//        ITransformFactory tf = (ITransformFactory) jf.getJythonObject(
-//                "com.acacia.scaffolding.ITransformFactory", "/home/bradford/proj/pypipes/acacia-common/__init__.py");
-//        Transform  pytrans= tf.createTransform();
-//
-//        loader = ServiceLoader.load(ITransformFactory.class, ClassLoader.getSystemClassLoader());
-//        Iterator<ITransformFactory> transformsf = loader.iterator();
-//        while (transformsf.hasNext()) {
-//
-//            ITransformFactory f =  transformsf.next();
-//            Transform t = f.createTransform();
-//            System.out.println("Examining: " + f.getClass().getCanonicalName());
-//            if(executionPipelineClasses.contains(f.getClass().getCanonicalName())) {
-//                System.out.println("Loading: " + f.getClass().getCanonicalName());
-//            }
-//
-//        }
+        AbstractTransform tf = (AbstractTransform) jf.getJythonObject(
+                "com.acacia.scaffolding.AbstractTransform","~/proj/pypipes/acacia-common/__init__.py");
+
+       Iterator<AbstractTransform> transformsf = loader.iterator();
+        while (transformsf.hasNext()) {
+
+            AbstractTransform t  =  transformsf.next();
+            System.out.println("Examining: " + t.getClass().getCanonicalName());
+            if(executionPipelineClasses.contains(t.getClass().getCanonicalName())) {
+                System.out.println("Loading: " + t.getClass().getCanonicalName());
+            }
+
+        }
 
         //NOTE: to get this working, we need to include computation jars in the classpath. ew.
 
