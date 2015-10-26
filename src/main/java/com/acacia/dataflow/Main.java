@@ -99,29 +99,29 @@ public class Main {
         String errorPipeline = "projects/" + options.getProject()
                 + "/topics/" + options.getJobName() + "/error";
 
-        ServiceLoader<ITransformFactory> loader = null;
+      //  ServiceLoader<ITransformFactory> loader = null;
         //loader = ServiceLoader.load(ITransformFactory.class,classloader);
 
 
         //jythontest
-//
-//        JythonFactory jf = JythonFactory.getInstance();
+
+        JythonFactory jf = JythonFactory.getInstance();
 //        ITransformFactory tf = (ITransformFactory) jf.getJythonObject(
 //                "com.acacia.scaffolding.ITransformFactory", "/home/bradford/proj/pypipes/acacia-common/__init__.py");
 //        Transform  pytrans= tf.createTransform();
-
-        loader = ServiceLoader.load(ITransformFactory.class, ClassLoader.getSystemClassLoader());
-        Iterator<ITransformFactory> transformsf = loader.iterator();
-        while (transformsf.hasNext()) {
-
-            ITransformFactory f =  transformsf.next();
-            Transform t = f.createTransform();
-            System.out.println("Examining: " + f.getClass().getCanonicalName());
-            if(executionPipelineClasses.contains(f.getClass().getCanonicalName())) {
-                System.out.println("Loading: " + f.getClass().getCanonicalName());
-            }
-
-        }
+//
+//        loader = ServiceLoader.load(ITransformFactory.class, ClassLoader.getSystemClassLoader());
+//        Iterator<ITransformFactory> transformsf = loader.iterator();
+//        while (transformsf.hasNext()) {
+//
+//            ITransformFactory f =  transformsf.next();
+//            Transform t = f.createTransform();
+//            System.out.println("Examining: " + f.getClass().getCanonicalName());
+//            if(executionPipelineClasses.contains(f.getClass().getCanonicalName())) {
+//                System.out.println("Loading: " + f.getClass().getCanonicalName());
+//            }
+//
+//        }
 
         //NOTE: to get this working, we need to include computation jars in the classpath. ew.
 

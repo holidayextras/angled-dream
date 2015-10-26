@@ -23,11 +23,40 @@
   <groupId>com.acacia.dataflow</groupId>
   <artifactId>dataflow-pipelines</artifactId>
 
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1-ALPHA</version>
 
   <packaging>jar</packaging>
 
+
+  <distributionManagement>
+    <site>
+      <id>s3.site</id>
+      <url>s3://22acacia-deploy</url>
+    </site>
+    <repository>
+      <id>s3.release</id>
+      <url>s3://22acacia-deploy/release</url>
+    </repository>
+    <snapshotRepository>
+      <id>s3.snapshot</id>
+      <url>s3://22acacia-deploy/snapshot</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+
   <build>
+
+
+    <extensions>
+      <extension>
+        <groupId>org.kuali.maven.wagons</groupId>
+        <artifactId>maven-s3-wagon</artifactId>
+        <version>1.2.1</version>
+      </extension>
+    </extensions>
+
+
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -37,6 +66,12 @@
           <target>1.8</target>
         </configuration>
       </plugin>
+
+
+
+
+
+
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -180,4 +215,8 @@
       <version>4.11</version>
     </dependency>
   </dependencies>
+
+
+
+
 </project>
