@@ -60,6 +60,9 @@ public class Main {
     }
 
 
+
+
+
     /**
      * Sets up and starts streaming pipeline.
      *
@@ -79,9 +82,12 @@ public class Main {
         options.setRunner(DataflowPipelineRunner.class);
         options.setMaxNumWorkers(1);
         options.setNumWorkers(1);
+        options.setZone("europe-west1-d");
         options.setWorkerMachineType("n1-standard-1");
 
-        List<String> stagingFiles = Lists.newArrayList(Arrays.asList(options.getExternalFiles().split(",")));
+
+        //needs to upload python files
+        //List<String> stagingFiles = Lists.newArrayList(Arrays.asList(options.getExternalFiles().split(",")));
 
         //shouldn't be necessary -- google uploads classpath automatically
         //options.setFilesToStage(stageFiles(stagingFiles));
@@ -98,7 +104,7 @@ public class Main {
         dataflowUtils.setup();
 
 
-        //NOTE -- ALWAYS BUNDLE DEPENDENCIES IN CLASS JARS
+        //NOTE -- ALWAYS BUNDLE DEPENDENCIES IN CLASS JARS?
 
         String errorPipeline = "projects/" + options.getProject()
                 + "/topics/" + options.getJobName() + "/error";
@@ -107,6 +113,9 @@ public class Main {
         loader = ServiceLoader.load(AbstractTransformComposer.class, ClassLoader.getSystemClassLoader());
 
         List<AbstractTransformComposer> transformComposers = new ArrayList<>();
+
+        //FOR TESTING: use test jars in settings->module->dependencies->libraries? this'll put it in the right classpath for run/debug. like target/AppendTransform.jar
+        //NOTE: how will this work in production? list directories and the bastion node is smart enough to pull them from github?
 
 
         //jythontest
@@ -124,7 +133,6 @@ public class Main {
             transformComposers.add(c);
 
             for (AbstractTransform t : c.getOrderedTransforms()) {
-
 
                 System.out.println("Examining: " + t.getClass().getCanonicalName());
                 if (executionPipelineClasses.contains(t.getClass().getCanonicalName())) {

@@ -1,0 +1,33 @@
+[
+{"name": "event", "type": "string", "mode": "nullable"},
+{"name": "owts", "type": "string", "mode": "nullable"},
+{"name": "owts_tmp_v2", "type": "string", "mode": "nullable"},
+{"name": "page_id", "type": "integer", "mode": "nullable"},
+{"name": "page_action_id", "type": "integer", "mode": "nullable"},
+{"name": "date", "type": "timestamp", "mode": "nullable"},
+{"name": "orion_writetime", "type": "timestamp", "mode": "nullable"},
+{"name": "client_writestamp", "type": "timestamp", "mode": "nullable"},
+{"name": "protocol", "type": "string", "mode": "nullable"},
+{"name": "domain", "type": "string", "mode": "nullable"},
+{"name": "path", "type": "string", "mode": "nullable"},
+{"name": "data", "type": "record", "mode": "nullable",
+"fields": [
+  {"name": "action", "type": "record", "mode": "nullable",
+  "fields": [ {"name": "name", "type": "string", "mode": "nullable"}]},
+  {"name": "test_name", "type": "string", "mode": "nullable"},
+  {"name": "variant", "type": "string", "mode": "nullable"},
+  {"name": "setp", "type": "string", "mode": "nullable"},
+  {"name": "booking_ref", "type": "string", "mode": "nullable"},
+  {"name": "resource_params", "type": "record", "mode": "nullable",
+  "fields": [{"name": "bkg_ref", "type": "string", "mode": "nullable"},
+    {"name": "bref", "type": "string", "mode": "nullable"}]
+  }]
+},
+{"name": "screen", "type": "record", "mode": "nullable",
+  "fields": [{"name": "height", "type": "integer", "mode": "nullable"},
+    {"name": "width", "type": "integer", "mode": "nullable"}
+  ]
+},
+{"name": "source_ip", "type": "string", "mode": "nullable"}
+
+]
