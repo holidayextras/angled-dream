@@ -43,7 +43,7 @@ public class OrionToBigQuery {
        static{
            try {
                RT.loadResourceScript("extract_orion.clj");
-               extract = RT.var("extract-orion", "extract-clean");
+               extract = RT.var("extract-orion", "extract");
            } catch (IOException e) {
                e.printStackTrace();
            }
@@ -55,15 +55,27 @@ public class OrionToBigQuery {
         public void processElement(ProcessContext c) {
 
             Map hm = (Map) extract.invoke(c.element());
-            TableRow t = new TableRow();
-            t.putAll(hm);
-            try {
-                LOG.warn(t.toPrettyString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            c.output(t);
 
+            if (hm != null){
+
+            LOG.warn(hm.getClass().getName());
+
+            if(hm.size() > 2) {
+
+                TableRow t = new TableRow();
+
+                t.putAll(hm);
+                try {
+                    LOG.warn(t.toPrettyString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                c.output(t);
+            }
+else{ LOG.warn("null item");}
+
+            }
         }
     }
 
@@ -92,17 +104,20 @@ public class OrionToBigQuery {
 //        options.setNumWorkers(1);
         options.setWorkerMachineType("n1-standard-1");
         options.setZone("europe-west1-d");
-        options.setStagingLocation("gs://hx-test/hx-staging-alleu");
-        options.setTempLocation("gs://hx-test/hx-temp");
+        options.setStagingLocation("gs://hx-staging-alleu");
+        options.setTempLocation("gs://hx-temp");
 
         Pipeline pipeline = DataflowPipeline.create(options);
 
                 //create schema with bq update dataset:table schema.json
 
 
-        pipeline.apply(TextIO.Read.named("ReadJSON").from("gs://hx-orion/production/archive/20150506/ec2-46-137-31-55.eu-west-1.compute.amazonaws.com.program.log.201505060000.gz"))
+     //   pipeline.apply(TextIO.Read.named("ReadJSON").from("gs://hx-orion/production/archive/20150506/ec2-46-137-31-55.eu-west-1.compute.amazonaws.com.program.log.201505060000.gz"))
+        pipeline.apply(TextIO.Read.named("ReadJSON").from("gs://hx-orion/production/archive/20150506/*"))
+
                 .apply(ParDo.of(new CreateBigquery()))
                 .apply(BigQueryIO.Write
+
                         .to("hx-test:hx_orion.hx_test")
                         .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_NEVER)
                         .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND));
