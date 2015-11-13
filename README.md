@@ -12,7 +12,8 @@ TO RUN SAMPLES:
     1. mvn package
 1. Build your operations into jars, sample:
     1. git clone https://github.com/22Acacia/pipeline-examples  (requires angleddream installed, will move to maven repo later)
-    1. in pipeline-examples: mvn package
+    1. cd pipeline-examples 
+    2. mvn package
 2. Execute dataflow job according to below:
 
 Command line options:
