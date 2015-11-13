@@ -1,9 +1,8 @@
-package com.acacia.dataflow.common;
+package com.acacia.angleddream.common;
 
 
-
-import com.acacia.scaffolding.AbstractTransform;
-import com.acacia.scaffolding.AbstractTransformComposer;
+import com.acacia.sdk.AbstractTransform;
+import com.acacia.sdk.AbstractTransformComposer;
 import com.google.cloud.dataflow.sdk.transforms.PTransform;
 import com.google.cloud.dataflow.sdk.transforms.ParDo;
 import com.google.cloud.dataflow.sdk.values.PCollection;
@@ -28,13 +27,6 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollection<
 
         PCollection<String> tmp = item;
 
-
-//        JythonFactory jf = JythonFactory.getInstance();
-//        AbstractTransformComposer tf = (AbstractTransformComposer) jf.getJythonObject(
-//                "com.acacia.scaffolding.AbstractTransformComposer", "/home/bradford/proj/pypipes/acacia-common/__init__.py");
-//        Transform  pytrans= tf.createTransform();
-
-//        tmp = tmp.apply(ParDo.named(tmp.getName()).of(pytrans));
 
         Iterator<AbstractTransformComposer> transforms = loader.iterator();
         while (transforms.hasNext()) {

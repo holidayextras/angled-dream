@@ -14,23 +14,19 @@
  * the License.
  */
 
-package com.acacia.dataflow;
+package com.acacia.angleddream;
 
-import com.acacia.dataflow.common.*;
-import com.acacia.scaffolding.AbstractTransform;
+import com.acacia.angleddream.common.*;
 
-import com.acacia.scaffolding.AbstractTransformComposer;
-import com.google.api.client.util.Lists;
+import com.acacia.sdk.AbstractTransform;
+import com.acacia.sdk.AbstractTransformComposer;
 import com.google.cloud.dataflow.sdk.Pipeline;
 import com.google.cloud.dataflow.sdk.PipelineResult;
 import com.google.cloud.dataflow.sdk.io.PubsubIO;
-import com.google.cloud.dataflow.sdk.io.Read;
 import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipeline;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipelineRunner;
 import com.google.cloud.dataflow.sdk.transforms.DoFn;
-import com.google.cloud.dataflow.sdk.transforms.ParDo;
-import org.apache.avro.generic.GenericData;
 
 import java.io.IOException;
 import java.net.URLClassLoader;
@@ -80,10 +76,10 @@ public class Main {
         // In order to cancel the pipelines automatically,
         // {@literal DataflowPipelineRunner} is forced to be used.
         options.setRunner(DataflowPipelineRunner.class);
-        options.setMaxNumWorkers(1);
-        options.setNumWorkers(1);
-        options.setZone("europe-west1-d");
-        options.setWorkerMachineType("n1-standard-1");
+//        options.setMaxNumWorkers(1);
+//        options.setNumWorkers(1);
+//        options.setZone("europe-west1-d");
+//        options.setWorkerMachineType("n1-standard-1");
 
 
         //needs to upload python files
@@ -92,37 +88,34 @@ public class Main {
         //shouldn't be necessary -- google uploads classpath automatically
         //options.setFilesToStage(stageFiles(stagingFiles));
 
-        List<String> outputTopics = Arrays.asList(options.getOutputTopics().split(","));
-        List<String> executionPipelineClasses = Arrays.asList(options.getExecutionPipelineClasses().split(","));
+        List<String> outputTopics = new ArrayList<>();
+
+        if(options.getOutputTopics() != null) {
+            outputTopics = Arrays.asList(options.getOutputTopics().split(","));
+        }
+
+        List<String> executionPipelineClasses = new ArrayList<>();
+        if(options.getExecutionPipelineClasses() != null) {
+            executionPipelineClasses = Arrays.asList(options.getExecutionPipelineClasses().split(","));
+        }
 
 
         //List<Class<?>> transforms = getAllClasses(executionPipelineClasses, stagingFiles);
 
         List<Class<?>> transforms = new ArrayList<>();
 
-        DataflowUtils dataflowUtils = new DataflowUtils(options);
-        dataflowUtils.setup();
+//        DataflowUtils dataflowUtils = new DataflowUtils(options);
+//        dataflowUtils.setup();
 
-
-        //NOTE -- ALWAYS BUNDLE DEPENDENCIES IN CLASS JARS?
+          //NOTE -- ALWAYS BUNDLE DEPENDENCIES IN CLASS JARS?
 
         String errorPipeline = "projects/" + options.getProject()
-                + "/topics/" + options.getJobName() + "/error";
+                + "/topics/" + options.getJobName() + "-err";
 
         ServiceLoader<AbstractTransformComposer> loader = null;
         loader = ServiceLoader.load(AbstractTransformComposer.class, ClassLoader.getSystemClassLoader());
 
         List<AbstractTransformComposer> transformComposers = new ArrayList<>();
-
-        //FOR TESTING: use test jars in settings->module->dependencies->libraries? this'll put it in the right classpath for run/debug. like target/AppendTransform.jar
-        //NOTE: how will this work in production? list directories and the bastion node is smart enough to pull them from github?
-
-
-        //jythontest
-
-        JythonFactory jf = JythonFactory.getInstance();
-        AbstractTransform tf = (AbstractTransform) jf.getJythonObject(
-                "com.acacia.scaffolding.AbstractTransform","~/proj/pypipes/acacia-common/__init__.py");
 
        Iterator<AbstractTransformComposer> transformsf = loader.iterator();
 
@@ -149,12 +142,11 @@ public class Main {
 
         //need to support more than ParDo.of in scaffolding
 
-        pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
-
-                .apply(new MultiTransform())
-                //.apply(ParDo.of(new Append()));
-                .apply(MultiWrite.topics(outputTopics));
-
+        if (!outputTopics.isEmpty()) {
+            pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
+                    .apply(new MultiTransform())
+                    .apply(MultiWrite.topics(outputTopics));
+        }
 
         PipelineResult result = pipeline.run();
 

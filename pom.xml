@@ -20,8 +20,8 @@
   <modelVersion>4.0.0</modelVersion>
 
 
-  <groupId>com.acacia.dataflow</groupId>
-  <artifactId>dataflow-pipelines</artifactId>
+  <groupId>com.acacia.angleddream</groupId>
+  <artifactId>angleddream</artifactId>
 
   <version>0.1-ALPHA</version>
 
@@ -157,8 +157,15 @@
     <dependency>
       <groupId>com.google.cloud.dataflow</groupId>
       <artifactId>google-cloud-dataflow-java-sdk-all</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.1</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.google.cloud.dataflow</groupId>
+      <artifactId>google-cloud-dataflow-java-examples-all</artifactId>
+      <version>1.2.1</version>
+    </dependency>
+
 
     <!-- Dependencies below this line are specific dependencies needed by the examples code. -->
     <dependency>
