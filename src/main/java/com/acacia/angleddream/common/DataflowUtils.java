@@ -99,6 +99,8 @@ public class DataflowUtils {
     if (!pubsubTopicOptions.getPubsubTopic().isEmpty()) {
       pendingMessages.add("*******************Set Up Input Pubsub Topic*********************");
       setupPubsubTopics(pubsubTopicOptions.getPubsubTopic());
+
+
       pendingMessages.add("The Pub/Sub topic has been set up for this example: "
           + pubsubTopicOptions.getPubsubTopic());
     }
@@ -113,6 +115,12 @@ public class DataflowUtils {
                 + pubsubTopicOptions.getPubsubTopic());
       }
     }
+    else{
+      pendingMessages.add("Weird: no output topics");
+      System.out.println("weird: no output topics?");
+    }
+
+
 
   }
 

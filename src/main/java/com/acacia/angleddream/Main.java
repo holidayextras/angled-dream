@@ -104,8 +104,10 @@ public class Main {
 
         List<Class<?>> transforms = new ArrayList<>();
 
-//        DataflowUtils dataflowUtils = new DataflowUtils(options);
-//        dataflowUtils.setup();
+
+        //do this temporarily until
+        DataflowUtils dataflowUtils = new DataflowUtils(options);
+        dataflowUtils.setup();
 
           //NOTE -- ALWAYS BUNDLE DEPENDENCIES IN CLASS JARS?
 
