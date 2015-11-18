@@ -111,8 +111,8 @@ public class Main {
 
           //NOTE -- ALWAYS BUNDLE DEPENDENCIES IN CLASS JARS?
 
-        String errorPipeline = "projects/" + options.getProject()
-                + "/topics/" + options.getJobName() + "-err";
+//        String errorPipeline = "projects/" + options.getProject()
+//                + "/topics/" + options.getPipelineName() + "-err";
 
         ServiceLoader<AbstractTransformComposer> loader = null;
         loader = ServiceLoader.load(AbstractTransformComposer.class, ClassLoader.getSystemClassLoader());

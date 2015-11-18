@@ -19,6 +19,10 @@ public interface PipelineComposerOptions extends PipelineOptions{
     void setExternalFiles(String pipelineClasses);
 
 
+    @Description("Pipeline Name")
+    @Default.String("unnamed-pipeline")
+    String getPipelineName();
+    void setPipelineName(String pipelineName);
 
 
 
