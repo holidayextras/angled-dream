@@ -182,11 +182,6 @@
       </exclusions>
     </dependency>
 
-    <dependency>
-      <groupId>com.acacia.scaffolding</groupId>
-      <artifactId>scaffolding</artifactId>
-      <version>0.1-ALPHA</version>
-    </dependency>
 
     <dependency>
       <groupId>org.python</groupId>
