@@ -12,7 +12,14 @@ public abstract class AbstractTransform extends DoFn<String,String> {
 
 
     @Override
-    public final void processElement(ProcessContext processContext) throws Exception {
-        processContext.output(transform(processContext.element()));
+    public final void processElement(ProcessContext processContext) {
+
+        try {
+            processContext.output(transform(processContext.element()));
+        }
+        catch(Exception e){
+
+        }
+
     }
 }

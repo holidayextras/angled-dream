@@ -43,22 +43,6 @@ import java.util.*;
 public class Main {
 
 
-    static URLClassLoader classloader;
-
-    /**
-     * A DoFn that uppercases a word.
-     */
-    static class Append extends DoFn<String, String> {
-        @Override
-        public void processElement(ProcessContext c) {
-            c.output(c.element() + "w00t");
-        }
-    }
-
-
-
-
-
     /**
      * Sets up and starts streaming pipeline.
      *
@@ -100,10 +84,7 @@ public class Main {
         }
 
 
-        //List<Class<?>> transforms = getAllClasses(executionPipelineClasses, stagingFiles);
-
         List<Class<?>> transforms = new ArrayList<>();
-
 
         //do this temporarily until
         DataflowUtils dataflowUtils = new DataflowUtils(options);
@@ -111,8 +92,6 @@ public class Main {
 
           //NOTE -- ALWAYS BUNDLE DEPENDENCIES IN CLASS JARS?
 
-//        String errorPipeline = "projects/" + options.getProject()
-//                + "/topics/" + options.getPipelineName() + "-err";
 
         ServiceLoader<AbstractTransformComposer> loader = null;
         loader = ServiceLoader.load(AbstractTransformComposer.class, ClassLoader.getSystemClassLoader());
@@ -138,7 +117,7 @@ public class Main {
 
         }
 
-        //NOTE: to get this working, we need to include computation jars in the classpath. ew.
+        //TODO: change multiwrite to side outputs?
 
         Pipeline pipeline = DataflowPipeline.create(options);
 

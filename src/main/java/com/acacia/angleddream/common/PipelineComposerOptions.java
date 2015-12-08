@@ -25,5 +25,12 @@ public interface PipelineComposerOptions extends PipelineOptions{
     void setPipelineName(String pipelineName);
 
 
+    @Description("Error Pipeline Name")
+    @Default.String("error-unnamed-pipeline")
+    String getErrorPipelineName();
+    void setErrorPipelineName(String pipelineName);
+
+
+
 
 }
