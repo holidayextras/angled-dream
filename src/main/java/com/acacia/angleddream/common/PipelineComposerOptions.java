@@ -13,11 +13,9 @@ public interface PipelineComposerOptions extends PipelineOptions{
     String getExecutionPipelineClasses();
     void setExecutionPipelineClasses(String pipelineClasses);
 
-
     @Description("Comma-delimited path to files to get classes from for execution")
     String getExternalFiles();
     void setExternalFiles(String pipelineClasses);
-
 
     @Description("Pipeline Name")
     @Default.String("unnamed-pipeline")
