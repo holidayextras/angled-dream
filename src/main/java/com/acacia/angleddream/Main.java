@@ -22,11 +22,13 @@ import com.acacia.sdk.AbstractTransform;
 import com.acacia.sdk.AbstractTransformComposer;
 import com.google.cloud.dataflow.sdk.Pipeline;
 import com.google.cloud.dataflow.sdk.PipelineResult;
+import com.google.cloud.dataflow.sdk.io.BigQueryIO;
 import com.google.cloud.dataflow.sdk.io.PubsubIO;
 import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipeline;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipelineRunner;
 import com.google.cloud.dataflow.sdk.transforms.DoFn;
+import com.google.cloud.dataflow.sdk.transforms.ParDo;
 
 import java.io.IOException;
 import java.net.URLClassLoader;
@@ -57,20 +59,9 @@ public class Main {
                 .withValidation()
                 .as(ComposerManagerOptions.class);
         options.setStreaming(true);
-        // In order to cancel the pipelines automatically,
-        // {@literal DataflowPipelineRunner} is forced to be used.
         options.setRunner(DataflowPipelineRunner.class);
-//        options.setMaxNumWorkers(1);
-//        options.setNumWorkers(1);
-//        options.setZone("europe-west1-d");
-//        options.setWorkerMachineType("n1-standard-1");
 
 
-        //needs to upload python files
-        //List<String> stagingFiles = Lists.newArrayList(Arrays.asList(options.getExternalFiles().split(",")));
-
-        //shouldn't be necessary -- google uploads classpath automatically
-        //options.setFilesToStage(stageFiles(stagingFiles));
 
         List<String> outputTopics = new ArrayList<>();
 
@@ -130,6 +121,21 @@ public class Main {
         }
 
         if(options.getBigQueryTable() != null){
+
+            //"BigQuery table to write to, specified as
+            // "<project_id>:<dataset_id>.<table_id>. The dataset must already exist."
+
+            String bqRef = options.getProject() + ":" + options.getBigQueryDataset() + "." + options.getBigQueryTable();
+
+            pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
+                    .apply(new MultiTransform())
+                    .apply(ParDo.of(new BigQueryProcessor()))
+                    .apply(BigQueryIO.Write
+                            .to(bqRef)
+                            .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_NEVER)
+                            .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND));
+
+
 
         }
 
