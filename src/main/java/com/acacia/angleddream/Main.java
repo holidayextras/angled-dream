@@ -129,10 +129,6 @@ public class Main {
                     .apply(MultiWrite.topics(outputTopics));
         }
 
-        if(options.getBigQueryTable() != null){
-
-        }
-
         PipelineResult result = pipeline.run();
 
     }
