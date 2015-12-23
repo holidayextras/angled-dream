@@ -60,10 +60,6 @@ public class Main {
         // In order to cancel the pipelines automatically,
         // {@literal DataflowPipelineRunner} is forced to be used.
         options.setRunner(DataflowPipelineRunner.class);
-//        options.setMaxNumWorkers(1);
-//        options.setNumWorkers(1);
-//        options.setZone("europe-west1-d");
-//        options.setWorkerMachineType("n1-standard-1");
 
 
         //needs to upload python files
