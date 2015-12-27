@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class BigQueryProcessor extends DoFn<String, TableRow> {
 
-    final Gson gson = new Gson();
+    static final Gson gson = new Gson();
 
     @Override
     public void processElement(ProcessContext c) {
@@ -27,9 +27,7 @@ public class BigQueryProcessor extends DoFn<String, TableRow> {
             if(hm.size() > 0) {
 
                 TableRow t = new TableRow();
-
                 t.putAll(hm);
-
                 c.output(t);
             }
 

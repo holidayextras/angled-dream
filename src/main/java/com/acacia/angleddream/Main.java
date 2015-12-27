@@ -20,6 +20,8 @@ import com.acacia.angleddream.common.*;
 
 import com.acacia.sdk.AbstractTransform;
 import com.acacia.sdk.AbstractTransformComposer;
+import com.acacia.sdk.TempOrionTableSchema;
+import com.google.api.services.bigquery.model.TableSchema;
 import com.google.cloud.dataflow.sdk.Pipeline;
 import com.google.cloud.dataflow.sdk.PipelineResult;
 import com.google.cloud.dataflow.sdk.io.BigQueryIO;
@@ -125,22 +127,25 @@ public class Main {
             //"BigQuery table to write to, specified as
             // "<project_id>:<dataset_id>.<table_id>. The dataset must already exist."
 
+
+
             String bqRef = options.getProject() + ":" + options.getBigQueryDataset() + "." + options.getBigQueryTable();
+
+            TempOrionTableSchema ts = new TempOrionTableSchema();
+
 
             pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
                     .apply(new MultiTransform())
                     .apply(ParDo.of(new BigQueryProcessor()))
                     .apply(BigQueryIO.Write
                             .to(bqRef)
-                            .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_NEVER)
+                            .withSchema(ts.getOrionTS())
+                            .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
                             .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND));
 
 
-
         }
-
         PipelineResult result = pipeline.run();
-
     }
 
 
