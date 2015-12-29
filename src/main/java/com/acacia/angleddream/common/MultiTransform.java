@@ -9,6 +9,8 @@ import com.google.cloud.dataflow.sdk.values.PCollection;
 import com.google.cloud.dataflow.sdk.values.PCollectionTuple;
 import com.google.cloud.dataflow.sdk.values.TupleTag;
 import com.google.cloud.dataflow.sdk.values.TupleTagList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,6 +23,9 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollection<
     final TupleTag<String> mainOutput = new TupleTag<>();
     final TupleTag<String> errorOutput = new TupleTag<>();
     private List<TupleTag> tagList = new ArrayList<>();
+
+
+    private static final Logger LOG = LoggerFactory.getLogger(MultiTransform.class);
 
     public MultiTransform(){
 
@@ -37,15 +42,32 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollection<
 
 
         Iterator<AbstractTransformComposer> transforms = loader.iterator();
+
+
+
         while (transforms.hasNext()) {
 
             AbstractTransformComposer f =  transforms.next();
 
+        //    System.out.println("Composer: " + f.getClass().getCanonicalName());
+
+            if(f.getOrderedTransforms() != null)
+          //      System.out.println("OrderedTransforms: " + f.getOrderedTransforms().size());
+
+
+
             for(AbstractTransform t : f.getOrderedTransforms()) {
 
-                System.out.println("Applying: " + t.getClass().getCanonicalName());
-                results = tmp.apply(ParDo.named(tmp.getName()).withOutputTags(mainOutput, TupleTagList.of(errorOutput)).of(t));
-                tmp = results.get(mainOutput);
+
+            //    System.out.println("Applying: " + t.getClass().getCanonicalName());
+              //  System.out.println("Input: " + item);
+      //          results = tmp.apply(ParDo.named(tmp.getName()).withOutputTags(mainOutput, TupleTagList.of(errorOutput)).of(t));
+
+                tmp = tmp.apply(ParDo.named(tmp.getName()).of(t));
+
+                //System.out.println("Output: " + tmp);
+
+             //   tmp = results.get(mainOutput);
 
                 //how to also return error?
 

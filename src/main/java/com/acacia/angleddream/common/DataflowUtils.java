@@ -105,7 +105,7 @@ public class DataflowUtils {
           + pubsubTopicOptions.getPubsubTopic());
     }
     PipelineComposerOptions pipelineComposerOptions = options.as(PipelineComposerOptions.class);
-    if (!pipelineComposerOptions.getOutputTopics().isEmpty()) {
+    if ((pipelineComposerOptions.getOutputTopics() != null) && !pipelineComposerOptions.getOutputTopics().isEmpty()) {
 
       for(String t : pipelineComposerOptions.getOutputTopics().split(",")) {
 

@@ -1,6 +1,6 @@
 package com.acacia.angleddream.common;
 
-import com.google.cloud.dataflow.examples.common.ExampleBigQueryTableOptions;
+import com.google.cloud.dataflow.sdk.options.BigQueryOptions;
 
 
 /**
@@ -9,5 +9,5 @@ import com.google.cloud.dataflow.examples.common.ExampleBigQueryTableOptions;
  * <p>Inherits standard configuration options.
  */
 public interface ComposerManagerOptions
-        extends PubsubTopicOptions, PipelineComposerOptions, ExampleBigQueryTableOptions {
+        extends PubsubTopicOptions, PipelineComposerOptions, BigQueryOptions, BQTableOptions {
 }
