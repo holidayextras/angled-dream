@@ -3,7 +3,7 @@
 #  assumes we are in the project home directory
 mvn package
 ret=$?
-if [ $ret != 0 ]; then
+if [ $ret -ne 0 ]; then
   echo "Failed to build project"
   exit $ret
 fi
@@ -13,5 +13,17 @@ fi
 app_name=`ls -1 target/*.jar  | cut -d "/" -f 2 | tee VERSIONS.txt | grep -v original | tail -n 1 | cut -d "-" -f 1`
 
 gsutil cp target/*.jar gs://build-artifacts-public-eu/${app_name}
+ret=$?
+if [ $ret -ne 0 ]; then
+  echo "Failed to cp jar files to gstorage"
+  exit $ret
+fi
+
 gsutil cp VERSIONS.txt gs://build-artifacts-public-eu/${app_name}
+ret=$?
+if [ $ret -ne 0 ]; then
+  echo "Failed to cp VERSIONS.txt to gstorage"
+  exit $ret
+fi
+
 curl -XPOST https://circleci.com/api/v1/project/22acacia/pipeline-examples/tree/master?circle-token=$CIRCLE_TOKEN
