@@ -49,5 +49,7 @@ Command line options:
     --bigQuerySchema??
 
 
-
+VERSIONS.txt
+this file is a listing of the last built jar files as found in the target folder.  This file is then uploaded
+to google storage to a known bucket and then consuming application can chose which jar file to download. 
 
