@@ -31,6 +31,7 @@ import com.google.cloud.dataflow.sdk.runners.DataflowPipeline;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipelineRunner;
 import com.google.cloud.dataflow.sdk.transforms.DoFn;
 import com.google.cloud.dataflow.sdk.transforms.ParDo;
+import com.google.cloud.dataflow.sdk.values.PCollectionTuple;
 
 import java.io.IOException;
 import java.net.URLClassLoader;
@@ -49,7 +50,7 @@ public class Main {
 
     /**
      * Sets up and starts streaming pipeline.
-     *
+     * <p>
      * NOTE: needs to take some kind of exectution graph as an argument? paths to oooo
      *
      * @throws IOException if there is a problem setting up resources
@@ -64,15 +65,15 @@ public class Main {
         options.setRunner(DataflowPipelineRunner.class);
 
 
-
         List<String> outputTopics = new ArrayList<>();
 
-        if(options.getOutputTopics() != null) {
+
+        if (options.getOutputTopics() != null) {
             outputTopics = Arrays.asList(options.getOutputTopics().split(","));
         }
 
         List<String> executionPipelineClasses = new ArrayList<>();
-        if(options.getExecutionPipelineClasses() != null) {
+        if (options.getExecutionPipelineClasses() != null) {
             executionPipelineClasses = Arrays.asList(options.getExecutionPipelineClasses().split(","));
         }
 
@@ -83,7 +84,7 @@ public class Main {
         DataflowUtils dataflowUtils = new DataflowUtils(options);
         dataflowUtils.setup();
 
-          //NOTE -- ALWAYS BUNDLE DEPENDENCIES IN CLASS JARS?
+        //NOTE -- ALWAYS BUNDLE DEPENDENCIES IN CLASS JARS?
 
 
         ServiceLoader<AbstractTransformComposer> loader = null;
@@ -91,7 +92,7 @@ public class Main {
 
         List<AbstractTransformComposer> transformComposers = new ArrayList<>();
 
-       Iterator<AbstractTransformComposer> transformsf = loader.iterator();
+        Iterator<AbstractTransformComposer> transformsf = loader.iterator();
 
         while (transformsf.hasNext()) {
 
@@ -116,17 +117,33 @@ public class Main {
 
         //need to support more than ParDo.of in scaffolding
 
+        //need to check for proper things in classpath etc so people don't try to run w/ 0 pipelines
+
         if (!outputTopics.isEmpty()) {
-            pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
-                    .apply(new MultiTransform())
-                    .apply(MultiWrite.topics(outputTopics));
+
+            PCollectionTuple t = pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic())).apply(new MultiTransform());
+
+            //how to abstract out -- make sure everything just returns a PCollection or PCollectionTuple?
+
+
+            if (t.get(Tags.mainOutput) != null) {
+
+                for(String topic : outputTopics){
+                    t.get(Tags.mainOutput).apply(PubsubIO.Write.topic(topic));
+
+                }
+
+            }
+
+            if (t.get(Tags.errorOutput) != null) {
+                t.get(Tags.errorOutput).apply(PubsubIO.Write.topic(options.getErrorPipelineName()));
+            }
         }
 
-        if(options.getBigQueryTable() != null){
+        if (options.getBigQueryTable() != null) {
 
             //"BigQuery table to write to, specified as
             // "<project_id>:<dataset_id>.<table_id>. The dataset must already exist."
-
 
 
             String bqRef = options.getProject() + ":" + options.getBigQueryDataset() + "." + options.getBigQueryTable();
@@ -134,20 +151,27 @@ public class Main {
             TempOrionTableSchema ts = new TempOrionTableSchema();
 
 
-            pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
-                    .apply(new MultiTransform())
-                    .apply(ParDo.of(new BigQueryProcessor()))
-                    .apply(BigQueryIO.Write
-                            .to(bqRef)
-                            .withSchema(ts.getOrionTS())
-                            .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
-                            .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND));
+            PCollectionTuple t = pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
+                    .apply(new MultiTransform());
+
+            if (t.get(Tags.mainOutput) != null) {
+                t.get(Tags.mainOutput).apply(ParDo.of(new BigQueryProcessor()))
+                        .apply(BigQueryIO.Write
+                                .to(bqRef)
+                                .withSchema(ts.getOrionTS())
+                                .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
+                                .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND));
+
+            }
+
+            if (t.get(Tags.errorOutput) != null) {
+                t.get(Tags.errorOutput).apply(PubsubIO.Write.topic(options.getErrorPipelineName()));
+            }
 
 
         }
         PipelineResult result = pipeline.run();
     }
-
 
 
 }
