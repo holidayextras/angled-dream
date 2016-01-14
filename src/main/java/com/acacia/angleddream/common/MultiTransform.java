@@ -17,12 +17,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 
-public class MultiTransform extends PTransform<PCollection<String>, PCollection<String>> {
+public class MultiTransform extends PTransform<PCollection<String>, PCollectionTuple> {
 
     private ServiceLoader<AbstractTransformComposer> loader;
-    final TupleTag<String> mainOutput = new TupleTag<>();
-    final TupleTag<String> errorOutput = new TupleTag<>();
-    private List<TupleTag> tagList = new ArrayList<>();
+    //private List<TupleTag> tagList = new ArrayList<>();
 
 
     private static final Logger LOG = LoggerFactory.getLogger(MultiTransform.class);
@@ -30,15 +28,18 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollection<
     public MultiTransform(){
 
         loader = ServiceLoader.load(AbstractTransformComposer.class);
-        tagList.add(errorOutput);
+        //tagList.add(errorOutput);
 
     }
 
+
+
+
     @Override
-    public PCollection<String> apply(PCollection<String> item) {
+    public PCollectionTuple apply(PCollection<String> item) {
 
         PCollection<String> tmp = item;
-        PCollectionTuple results;
+        PCollectionTuple results = null;
 
 
         Iterator<AbstractTransformComposer> transforms = loader.iterator();
@@ -49,27 +50,17 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollection<
 
             AbstractTransformComposer f =  transforms.next();
 
-        //    System.out.println("Composer: " + f.getClass().getCanonicalName());
+            if(f.getOrderedTransforms() != null) {
 
-            if(f.getOrderedTransforms() != null)
-          //      System.out.println("OrderedTransforms: " + f.getOrderedTransforms().size());
+                for (AbstractTransform t : f.getOrderedTransforms()) {
+
+                    //t.errorOutput = Tags.errorOutput; //this is weird but you gotta do it because CDF uses object identity to emit to tuple tags  https://cloud.google.com/dataflow/model/multiple-pcollections#Heterogenous
+                    results = tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(t));
+
+                    //           tmp = tmp.apply(ParDo.named(tmp.getName()).of(t));
 
 
-
-            for(AbstractTransform t : f.getOrderedTransforms()) {
-
-
-            //    System.out.println("Applying: " + t.getClass().getCanonicalName());
-              //  System.out.println("Input: " + item);
-      //          results = tmp.apply(ParDo.named(tmp.getName()).withOutputTags(mainOutput, TupleTagList.of(errorOutput)).of(t));
-
-                tmp = tmp.apply(ParDo.named(tmp.getName()).of(t));
-
-                //System.out.println("Output: " + tmp);
-
-             //   tmp = results.get(mainOutput);
-
-                //how to also return error?
+                }
 
             }
 
@@ -77,7 +68,7 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollection<
 
 
 
-        return tmp;
+        return results;
 
     }
 
