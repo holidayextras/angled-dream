@@ -141,28 +141,24 @@ public class Main {
             //"BigQuery table to write to, specified as
             // "<project_id>:<dataset_id>.<table_id>. The dataset must already exist."
 
+            //TODO: error handling on bigquery writes?
+
 
             String bqRef = options.getProject() + ":" + options.getBigQueryDataset() + "." + options.getBigQueryTable();
 
             TempOrionTableSchema ts = new TempOrionTableSchema();
 
 
-            PCollectionTuple t = pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
-                    .apply(new MultiTransform());
-
-            if (t.get(Tags.mainOutput) != null) {
-                t.get(Tags.mainOutput).apply(ParDo.of(new BigQueryProcessor()))
-                        .apply(BigQueryIO.Write
+             pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
+                     .apply(ParDo.of(new BigQueryProcessor()))
+                       .apply(BigQueryIO.Write
                                 .to(bqRef)
                                 .withSchema(ts.getOrionTS())
                                 .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
                                 .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND));
 
-            }
 
-            if (t.get(Tags.errorOutput) != null) {
-                t.get(Tags.errorOutput).apply(PubsubIO.Write.topic(options.getErrorPipelineName()));
-            }
+
 
 
         }
