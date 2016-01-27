@@ -16,7 +16,6 @@ public class BigQueryProcessor extends DoFn<String, TableRow> {
 
     private static final Logger LOG = LoggerFactory.getLogger(BigQueryProcessor.class);
 
-
     @Override
     public void processElement(ProcessContext c) {
 

@@ -22,27 +22,34 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollectionT
     private ServiceLoader<AbstractTransformComposer> loader;
     //private List<TupleTag> tagList = new ArrayList<>();
 
+    Iterator<AbstractTransformComposer> transforms;
 
     private static final Logger LOG = LoggerFactory.getLogger(MultiTransform.class);
 
     public MultiTransform(){
 
         loader = ServiceLoader.load(AbstractTransformComposer.class);
-        //tagList.add(errorOutput);
+
+        transforms = loader.iterator();
 
     }
 
 
 
+    public MultiTransform(AbstractTransformComposer composer){
+
+        List<AbstractTransformComposer> composerList = new ArrayList<>();
+        composerList.add(composer);
+        transforms = composerList.iterator();
+
+
+    }
 
     @Override
     public PCollectionTuple apply(PCollection<String> item) {
 
         PCollection<String> tmp = item;
         PCollectionTuple results = null;
-
-
-        Iterator<AbstractTransformComposer> transforms = loader.iterator();
 
 
 
