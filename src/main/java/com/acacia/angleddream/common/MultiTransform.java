@@ -48,10 +48,13 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollectionT
     @Override
     public PCollectionTuple apply(PCollection<String> item) {
 
+        //do these here because deserialization?
+        loader = ServiceLoader.load(AbstractTransformComposer.class);
+
+        transforms = loader.iterator();
+
         PCollection<String> tmp = item;
         PCollectionTuple results = null;
-
-
 
         while (transforms.hasNext()) {
 
@@ -65,15 +68,9 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollectionT
                     results = tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(t));
 
                     //           tmp = tmp.apply(ParDo.named(tmp.getName()).of(t));
-
-
                 }
-
             }
-
         }
-
-
 
         return results;
 

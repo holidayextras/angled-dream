@@ -72,10 +72,7 @@ public class Main {
             outputTopics = Arrays.asList(options.getOutputTopics().split(","));
         }
 
-//        List<String> executionPipelineClasses = new ArrayList<>();
-//        if (options.getExecutionPipelineClasses() != null) {
-//            executionPipelineClasses = Arrays.asList(options.getExecutionPipelineClasses().split(","));
-//        }
+
 
         DataflowUtils dataflowUtils = new DataflowUtils(options);
         dataflowUtils.setup();
