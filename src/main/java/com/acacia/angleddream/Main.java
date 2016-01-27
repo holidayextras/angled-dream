@@ -72,15 +72,11 @@ public class Main {
             outputTopics = Arrays.asList(options.getOutputTopics().split(","));
         }
 
-        List<String> executionPipelineClasses = new ArrayList<>();
-        if (options.getExecutionPipelineClasses() != null) {
-            executionPipelineClasses = Arrays.asList(options.getExecutionPipelineClasses().split(","));
-        }
+//        List<String> executionPipelineClasses = new ArrayList<>();
+//        if (options.getExecutionPipelineClasses() != null) {
+//            executionPipelineClasses = Arrays.asList(options.getExecutionPipelineClasses().split(","));
+//        }
 
-
-        List<Class<?>> transforms = new ArrayList<>();
-
-        //do this temporarily until
         DataflowUtils dataflowUtils = new DataflowUtils(options);
         dataflowUtils.setup();
 
@@ -90,26 +86,26 @@ public class Main {
         ServiceLoader<AbstractTransformComposer> loader = null;
         loader = ServiceLoader.load(AbstractTransformComposer.class, ClassLoader.getSystemClassLoader());
 
-        List<AbstractTransformComposer> transformComposers = new ArrayList<>();
-
-        Iterator<AbstractTransformComposer> transformsf = loader.iterator();
-
-        while (transformsf.hasNext()) {
-
-            AbstractTransformComposer c = transformsf.next();
-
-            transformComposers.add(c);
-
-            for (AbstractTransform t : c.getOrderedTransforms()) {
-
-                System.out.println("Examining: " + t.getClass().getCanonicalName());
-                if (executionPipelineClasses.contains(t.getClass().getCanonicalName())) {
-                    System.out.println("Loading: " + t.getClass().getCanonicalName());
-                }
-
-            }
-
-        }
+//        List<AbstractTransformComposer> transformComposers = new ArrayList<>();
+//
+//        Iterator<AbstractTransformComposer> transformsf = loader.iterator();
+//
+//        while (transformsf.hasNext()) {
+//
+//            AbstractTransformComposer c = transformsf.next();
+//
+//            transformComposers.add(c);
+//
+//            for (AbstractTransform t : c.getOrderedTransforms()) {
+//
+//                System.out.println("Examining: " + t.getClass().getCanonicalName());
+//                if (executionPipelineClasses.contains(t.getClass().getCanonicalName())) {
+//                    System.out.println("Loading: " + t.getClass().getCanonicalName());
+//                }
+//
+//            }
+//
+//        }
 
         //TODO: change multiwrite to side outputs?
 
