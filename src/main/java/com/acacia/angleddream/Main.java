@@ -18,9 +18,8 @@ package com.acacia.angleddream;
 
 import com.acacia.angleddream.common.*;
 
-import com.acacia.sdk.AbstractTransform;
 import com.acacia.sdk.AbstractTransformComposer;
-import com.acacia.sdk.TempOrionTableSchema;
+import com.google.api.services.bigquery.model.TableFieldSchema;
 import com.google.api.services.bigquery.model.TableSchema;
 import com.google.cloud.dataflow.sdk.Pipeline;
 import com.google.cloud.dataflow.sdk.PipelineResult;
@@ -29,12 +28,12 @@ import com.google.cloud.dataflow.sdk.io.PubsubIO;
 import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipeline;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipelineRunner;
-import com.google.cloud.dataflow.sdk.transforms.DoFn;
 import com.google.cloud.dataflow.sdk.transforms.ParDo;
 import com.google.cloud.dataflow.sdk.values.PCollectionTuple;
+import com.google.gson.Gson;
 
+import java.io.FileReader;
 import java.io.IOException;
-import java.net.URLClassLoader;
 import java.util.*;
 
 /**
@@ -143,14 +142,21 @@ public class Main {
 
             String bqRef = options.getProject() + ":" + options.getBigQueryDataset() + "." + options.getBigQueryTable();
 
-            TempOrionTableSchema ts = new TempOrionTableSchema();
+
+            FileReader schemaSource = new FileReader(options.getBigQuerySchemaFile());
+
+            List<TableFieldSchema> fields = (new Gson())
+                    .<List<TableFieldSchema>>fromJson(schemaSource,
+                            (new ArrayList<TableFieldSchema>()).getClass());
+
+            TableSchema schema = new TableSchema().setFields(fields);
 
 
-             pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
+            pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
                      .apply(ParDo.of(new BigQueryProcessor()))
                        .apply(BigQueryIO.Write
                                 .to(bqRef)
-                                .withSchema(ts.getOrionTS())
+                                .withSchema(schema)
                                 .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
                                 .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND));
 
