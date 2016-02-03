@@ -18,7 +18,7 @@ public interface BQTableOptions extends PipelineOptions {
 
     @Description("BigQuery table name")
     String getBigQuerySchema();
-    void setBigQuerySchemaFile(String table);
+    void setBigQuerySchema(String table);
 
 //    @Description("BigQuery table schema")
 //    TableSchema getBigQuerySchema();
