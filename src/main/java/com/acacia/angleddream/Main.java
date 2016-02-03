@@ -62,6 +62,7 @@ public class Main {
                 .as(ComposerManagerOptions.class);
         options.setStreaming(true);
         options.setRunner(DataflowPipelineRunner.class);
+        options.setJobName(options.getPipelineName());
 
 
         List<String> outputTopics = new ArrayList<>();
@@ -159,9 +160,6 @@ public class Main {
                                 .withSchema(schema)
                                 .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
                                 .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND));
-
-
-
 
 
         }
