@@ -35,7 +35,7 @@
     </site>
     <repository>
       <id>s3.release</id>
-      <url>s3://com.22acacia/release</url>
+      <url>s3://com.22acacia/releases</url>
     </repository>
     <snapshotRepository>
       <id>s3.snapshot</id>
