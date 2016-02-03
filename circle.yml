@@ -11,3 +11,4 @@ deployment:
     branch: master
     commands:
       - $HOME/$CIRCLE_PROJECT_REPONAME/deploy_project.sh
+      - mvn deploy

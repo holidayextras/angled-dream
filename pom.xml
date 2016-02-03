@@ -31,15 +31,15 @@
   <distributionManagement>
     <site>
       <id>s3.site</id>
-      <url>s3://22acacia-deploy</url>
+      <url>s3://com.22acacia/site</url>
     </site>
     <repository>
       <id>s3.release</id>
-      <url>s3://22acacia-deploy/release</url>
+      <url>s3://com.22acacia/release</url>
     </repository>
     <snapshotRepository>
       <id>s3.snapshot</id>
-      <url>s3://22acacia-deploy/snapshot</url>
+      <url>s3://com.22acacia/snapshot</url>
     </snapshotRepository>
   </distributionManagement>
 
