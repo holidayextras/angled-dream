@@ -62,7 +62,10 @@ public class Main {
                 .as(ComposerManagerOptions.class);
         options.setStreaming(true);
         options.setRunner(DataflowPipelineRunner.class);
-        options.setJobName(options.getPipelineName());
+
+
+        //don't do this because we need to avoid collisions in case a job is manually cancelled
+        //options.setJobName(options.getPipelineName());
 
 
         List<String> outputTopics = new ArrayList<>();
