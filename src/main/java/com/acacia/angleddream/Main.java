@@ -143,7 +143,7 @@ public class Main {
             String bqRef = options.getProject() + ":" + options.getBigQueryDataset() + "." + options.getBigQueryTable();
 
 
-            FileReader schemaSource = new FileReader(options.getBigQuerySchemaFile());
+            FileReader schemaSource = new FileReader(options.getBigQuerySchema());
 
             List<TableFieldSchema> fields = (new Gson())
                     .<List<TableFieldSchema>>fromJson(schemaSource,
