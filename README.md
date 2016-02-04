@@ -1,5 +1,5 @@
 # angled-dream
-PubSub -> Cloud Dataflow Pipeline Composition
+PubSub -> Cloud Dataflow Pipeline Composition,.
 
 
 TO RUN SAMPLES:
@@ -53,3 +53,6 @@ VERSIONS.txt
 this file is a listing of the last built jar files as found in the target folder.  This file is then uploaded
 to google storage to a known bucket and then consuming application can chose which jar file to download. 
 
+### Deployment
+
+This is deployed using https://github.com/aktau/github-release/, CircleCI, and https://jitpack.io/

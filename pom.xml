@@ -28,6 +28,15 @@
   <packaging>jar</packaging>
 
 
+
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
+
+<!--
   <distributionManagement>
     <site>
       <id>s3.site</id>
@@ -43,6 +52,7 @@
     </snapshotRepository>
   </distributionManagement>
 
+-->
 
   <build>
 
@@ -51,20 +61,14 @@
         <directory>src/main/resources</directory>
       </resource>
     </resources>
-    <testResources>
-      <testResource>
-        <directory>src/test/clojure</directory>
-      </testResource>
-    </testResources>
 
-
-    <extensions>
-      <extension>
-        <groupId>org.kuali.maven.wagons</groupId>
-        <artifactId>maven-s3-wagon</artifactId>
-        <version>1.2.1</version>
-      </extension>
-    </extensions>
+    <!--<extensions>-->
+      <!--<extension>-->
+        <!--<groupId>org.kuali.maven.wagons</groupId>-->
+        <!--<artifactId>maven-s3-wagon</artifactId>-->
+        <!--<version>1.2.1</version>-->
+      <!--</extension>-->
+    <!--</extensions>-->
 
 
 
