@@ -23,7 +23,7 @@
   <groupId>com.acacia</groupId>
   <artifactId>angleddream</artifactId>
 
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1-ALPHA</version>
 
   <packaging>jar</packaging>
 
