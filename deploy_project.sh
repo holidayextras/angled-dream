@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 #  assumes we are in the project home directory
 mvn package
@@ -12,8 +13,10 @@ fi
 #  application name to an env var
 app_name=`ls -1 target/*.jar  | cut -d "/" -f 2 | tee VERSIONS.txt | grep -v original | tail -n 1 | cut -d "-" -f 1`
 
+set +x
 echo $GOOGLE_CREDENTIALS > account.json
 /opt/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file account.json
+set -x
 
 gsutil cp target/*.jar gs://${GSTORAGE_DEST_BUCKET}/${app_name}
 ret=$?
