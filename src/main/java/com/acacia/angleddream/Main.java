@@ -80,38 +80,16 @@ public class Main {
         DataflowUtils dataflowUtils = new DataflowUtils(options);
         dataflowUtils.setup();
 
-        //NOTE -- ALWAYS BUNDLE DEPENDENCIES IN CLASS JARS?
 
 
+        //these are still needed even if
         ServiceLoader<AbstractTransformComposer> loader = null;
         loader = ServiceLoader.load(AbstractTransformComposer.class, ClassLoader.getSystemClassLoader());
 
-//        List<AbstractTransformComposer> transformComposers = new ArrayList<>();
-//
-//        Iterator<AbstractTransformComposer> transformsf = loader.iterator();
-//
-//        while (transformsf.hasNext()) {
-//
-//            AbstractTransformComposer c = transformsf.next();
-//
-//            transformComposers.add(c);
-//
-//            for (AbstractTransform t : c.getOrderedTransforms()) {
-//
-//                System.out.println("Examining: " + t.getClass().getCanonicalName());
-//                if (executionPipelineClasses.contains(t.getClass().getCanonicalName())) {
-//                    System.out.println("Loading: " + t.getClass().getCanonicalName());
-//                }
-//
-//            }
-//
-//        }
-
-        //TODO: change multiwrite to side outputs?
 
         Pipeline pipeline = DataflowPipeline.create(options);
 
-        //need to support more than ParDo.of in scaffolding
+        //need to support more than ParDo.of in SDK
 
         //need to check for proper things in classpath etc so people don't try to run w/ 0 pipelines
 
@@ -120,7 +98,6 @@ public class Main {
             PCollectionTuple t = pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic())).apply(new MultiTransform());
 
             //how to abstract out -- make sure everything just returns a PCollection or PCollectionTuple?
-
 
             if (t.get(Tags.mainOutput) != null) {
 

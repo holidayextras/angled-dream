@@ -36,7 +36,7 @@ public class TestPy {
 //        PyObject x = interp.get("x");
 //        System.out.println("x: " + x);
 
-        interp.compile("table_last_search_info", "/home/bradford/proj/sinksponsys/sinksponsys/get_LAST_SEARCH_INFO.py");
+        interp.compile("table_last_search_info", "/home/bradford/proj/sinksponsys/sinksponsys/table_last_search_info.py");
         interp.exec("import sys");
         interp.exec("sys.path.append(\"/home/bradford/proj/sinksponsys/sinksponsys\")");
 
@@ -44,7 +44,7 @@ public class TestPy {
 
         interp.set("out", new PyString());
         interp.set("inval", new PyString(str2));
-        interp.exec("out = table_last_search_info.build_hot_leads_row_from_str(inval)");
+        interp.exec("out = table_last_search_info.get_LAST_SEARCH_INFO(inval)");
 
 
 
