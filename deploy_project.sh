@@ -25,11 +25,5 @@ if [ $ret -ne 0 ]; then
   exit $ret
 fi
 
-gsutil cp VERSIONS.txt gs://${GSTORAGE_DEST_BUCKET}/${app_name}
-ret=$?
-if [ $ret -ne 0 ]; then
-  echo "Failed to cp VERSIONS.txt to gstorage"
-  exit $ret
-fi
-
+gsutil acl ch -r -u AllUsers:R gs://$GSTORAGE_DEST_BUCKET/${app_name}
 curl -XPOST https://circleci.com/api/v1/project/22acacia/pipeline-examples/tree/master?circle-token=$CIRCLE_TOKEN
