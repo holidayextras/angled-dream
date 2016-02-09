@@ -37,12 +37,13 @@ import java.io.IOException;
 import java.util.*;
 
 
- public class Main {
+public class Main {
 
 
     /**
      * Sets up and starts streaming pipeline.
      * <*
+     *
      * @throws IOException if there is a problem setting up resources
      */
     public static void main(String[] args) throws IOException {
@@ -67,10 +68,8 @@ import java.util.*;
         }
 
 
-
         DataflowUtils dataflowUtils = new DataflowUtils(options);
         dataflowUtils.setup();
-
 
 
         //these are still needed even if they don't appear to do anything, because ServiceLoad is global.
@@ -84,25 +83,35 @@ import java.util.*;
 
         //need to check for proper things in classpath etc so people don't try to run w/ 0 pipelines
 
+        PCollectionTuple t = null;
+
         if (!outputTopics.isEmpty()) {
 
-            PCollectionTuple t = pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic())).apply(new MultiTransform());
+            try {
 
-            //how to abstract out -- make sure everything just returns a PCollection or PCollectionTuple?
+                t = pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic())).apply(new MultiTransform());
 
-            if (t.get(Tags.mainOutput) != null) {
+                //how to abstract out -- make sure everything just returns a PCollection or PCollectionTuple?
 
-                for(String topic : outputTopics){
-                    t.get(Tags.mainOutput).apply(PubsubIO.Write.topic(topic));
+                if (t.get(Tags.mainOutput) != null) {
+
+                    for (String topic : outputTopics) {
+                        t.get(Tags.mainOutput).apply(PubsubIO.Write.topic(topic));
+
+                    }
 
                 }
 
+                if (t.get(Tags.errorOutput) != null) {
+                    t.get(Tags.errorOutput).apply(PubsubIO.Write.topic(options.getErrorPipelineName()));
+                }
+
+            } catch (NullPointerException e) {
+                System.out.println("Exception: make sure PubsubTopic is not empty, and pipeline JAR file is on classpath, correctly named, correctly built, and in the correct bucket");
             }
 
-            if (t.get(Tags.errorOutput) != null) {
-                t.get(Tags.errorOutput).apply(PubsubIO.Write.topic(options.getErrorPipelineName()));
-            }
         }
+
 
         if (options.getBigQueryTable() != null) {
 
@@ -125,12 +134,12 @@ import java.util.*;
 
 
             pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()))
-                     .apply(ParDo.of(new BigQueryProcessor()))
-                       .apply(BigQueryIO.Write
-                                .to(bqRef)
-                                .withSchema(schema)
-                                .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
-                                .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND));
+                    .apply(ParDo.of(new BigQueryProcessor()))
+                    .apply(BigQueryIO.Write
+                            .to(bqRef)
+                            .withSchema(schema)
+                            .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
+                            .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND));
 
 
         }
