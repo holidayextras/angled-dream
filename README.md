@@ -2,6 +2,25 @@
 
 PubSub -> Cloud Dataflow Pipeline Composition.
 
+Angled-Dream takes .jar files containing classes which implement AbstractTransformComposer and AbstractTransform, turns them into Dataflow jobs, sets up inputs and outputs, and executes them.
+
+
+Maven:
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.22Acacia</groupId>
+            <artifactId>angled-dream</artifactId>
+            <version>-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 1. Build angleddream (you shouldn't need to do this, it's continuously built in a Maven repo):
     1. git clone https://github.com/22Acacia/angled-dream
@@ -9,23 +28,24 @@ PubSub -> Cloud Dataflow Pipeline Composition.
     1. mvn package
 
 
-## To execute by itself (terraform takes care of this in prod)
+## To execute by itself (You should not do this unless you need to manually test something in the cloud -- Sossity takes care of all deployment)
 
 
-1. Make sure you are authed into gcloud with the correct project
+1. Make sure you are autheticated into gcloud with the correct project
+1. Make sure you have built a standalone .jar for your pipeline with `mvn package`
 2. Execute dataflow job according to below:
 
 Command line options:
 
+To avoid billing/deployment mishaps, there are no defaults. Flags not provided will throw an exception and exit.
 
-    java -classpath angleddream-bundled-0.1-ALPHA.jar:/home/bradford/proj/example-scaffolding/target/transformexamples-0.1-ALPHA.jar com.acacia.dataflow.Main --stagingLocation=gs://hx-test/staging --project=hx-test --pubsubTopic=projects/hx-test/topics/data-topic --outputTopics=projects/hx-test/topics/output1,projects/hx-test/topics/output2 --maxNumWorkers=1 --numWorkers=1 --zone=europe-west1-c --workerMachineType=n1-standard-1
+    java -classpath angleddream-bundled-0.1-ALPHA.jar:/home/proj/examples/target/transformexamples-0.1-ALPHA-bundled.jar com.acacia.angleddream.Main --stagingLocation=gs://hx-test/staging --project=hx-test --pubsubTopic=projects/hx-test/topics/data-topic --outputTopics=projects/hx-test/topics/output1,projects/hx-test/topics/output2 --maxNumWorkers=1 --numWorkers=1 --zone=europe-west1-c --workerMachineType=n1-standard-1 --errorPipelineName=projects/hx-test/topics/output2-to-error-output2
 
-
-    -classpath: colon-separated jar file for angleddream and all other dependency jars (only one dash!)
+    -classpath: colon-separated jar files for angleddream and all other dependency jars (only one dash!)
     
-    com.acacia.dataflow.Main: main class for Dataflow job. usually this if you're using our sample libraries
+    com.acacia.angleddream.Main: main class for Dataflow job. Does not change.
     
-    --stagingLocation: GS3 bucket to upload jars and dependencies to
+    --stagingLocation: google cloud storage bucket to upload jars and dependencies to
     --project: GCloud project name
     --pubsubTopic: input topic for dataflow job
     --outputTopics: comma-separated pubsubs to output results to
@@ -33,18 +53,15 @@ Command line options:
     --numWorkers: initial number of workers on a job
     --zone: GCE zone where workers reside
     --workerMachineType: instance type
+    --errorPipelineName: pubsub topic to write errors to
 
 
-*** not implemented yet ***
+Only for BigQuery
 
-    --bigQueryDataset
-    --bigQueryTable
-    --bigQuerySchema??
+    --bigQueryDataset: destination Dataset for BigQuery sink
+    --bigQueryTable: destination table for BigQuery sink
+    --bigQuerySchema: path to JSON file describing BigQuery schema
 
-
-VERSIONS.txt
-this file is a listing of the last built jar files as found in the target folder.  This file is then uploaded
-to google storage to a known bucket and then consuming application can chose which jar file to download. 
 
 ### Deployment
 
