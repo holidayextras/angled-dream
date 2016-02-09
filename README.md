@@ -1,22 +1,15 @@
 # angled-dream
-PubSub -> Cloud Dataflow Pipeline Composition,.
+
+PubSub -> Cloud Dataflow Pipeline Composition.
 
 
-TO RUN SAMPLES:
-
-1. Build angleddream:
+1. Build angleddream (you shouldn't need to do this, it's continuously built in a Maven repo):
     1. git clone https://github.com/22Acacia/angled-dream
     1. cd angled-dream
-    1. mvn install
     1. mvn package
-1. Build your operations into jars, sample:
-    1. git clone https://github.com/22Acacia/pipeline-examples  (requires angleddream installed, will move to maven repo later)
-    1. cd pipeline-examples 
-    2. mvn package
 
 
-
-## to execute by itself (terraform takes care of this in prod)
+## To execute by itself (terraform takes care of this in prod)
 
 
 1. Make sure you are authed into gcloud with the correct project

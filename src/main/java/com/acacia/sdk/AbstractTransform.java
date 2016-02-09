@@ -40,7 +40,7 @@ public abstract class AbstractTransform extends DoFn<String,String> {
 
             //add new error field, errordt
             hm.put("error", e.getMessage());
-            hm.put("errordt", Long.toString(System.currentTimeMillis()));
+            hm.put("errortimestamp", Long.toString(System.currentTimeMillis()));
             String s = gson.toJson(hm);
 
             LOG.debug(s);

@@ -36,22 +36,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * <p>This pipeline example reads lines of text from a PubSub topic, splits each line
- * into individual words, capitalizes those words, and writes the output to
- * a BigQuery table.
- * <p>
- * <p>By default, the example will inject the data from the the Pub/Sub {@literal --pubsubTopic}.
- * It will make it available for the streaming pipeline to process.
- */
-public class Main {
+
+ public class Main {
 
 
     /**
      * Sets up and starts streaming pipeline.
-     * <p>
-     * NOTE: needs to take some kind of exectution graph as an argument? paths to oooo
-     *
+     * <*
      * @throws IOException if there is a problem setting up resources
      */
     public static void main(String[] args) throws IOException {
@@ -82,7 +73,7 @@ public class Main {
 
 
 
-        //these are still needed even if
+        //these are still needed even if they don't appear to do anything, because ServiceLoad is global.
         ServiceLoader<AbstractTransformComposer> loader = null;
         loader = ServiceLoader.load(AbstractTransformComposer.class, ClassLoader.getSystemClassLoader());
 
