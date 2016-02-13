@@ -144,6 +144,7 @@ public class Main {
 
         }
         PipelineResult result = pipeline.run();
+
     }
 
 
