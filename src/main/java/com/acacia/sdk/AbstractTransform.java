@@ -44,6 +44,7 @@ public abstract class AbstractTransform extends DoFn<String,String> {
             String s = gson.toJson(hm);
 
             LOG.debug(s);
+            System.out.println("exception log: " + s);
 
             processContext.sideOutput(errorOutput, s );
         }
