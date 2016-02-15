@@ -29,6 +29,9 @@ public interface PipelineComposerOptions extends PipelineOptions{
     void setErrorPipelineName(String pipelineName);
 
 
+    @Description("External Resources")
+    String getContainerDeps();
+    void setContainerDeps(String deps);
 
 
 }

@@ -85,6 +85,18 @@ public class Main {
 
         PCollectionTuple t = null;
 
+        Map<String, String> containerIPs = new HashMap<>();
+
+        if(options.getContainerDeps() != null){
+            String[] deps = options.getContainerDeps().split("\\|");
+            for(String dep : deps){
+                String[] item = dep.split(",");
+                containerIPs.put(item[0], item[1]);
+            }
+
+        }
+
+
         if (!outputTopics.isEmpty()) {
 
             try {
