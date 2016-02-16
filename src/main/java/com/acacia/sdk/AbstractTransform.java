@@ -1,6 +1,7 @@
 package com.acacia.sdk;
 
 
+import com.acacia.angleddream.common.Tags;
 import com.google.cloud.dataflow.sdk.transforms.DoFn;
 import com.google.cloud.dataflow.sdk.values.TupleTag;
 import com.google.gson.Gson;
@@ -21,6 +22,8 @@ public abstract class AbstractTransform extends DoFn<String,String> {
     //function to transform a string, used by processElement
     abstract public String transform(String input) throws GenericDataflowAppException;
 
+    abstract public String transform(String input, Map<String,String> args) throws GenericDataflowAppException;
+
     static final Gson gson = new Gson();
 
 
@@ -28,7 +31,13 @@ public abstract class AbstractTransform extends DoFn<String,String> {
     public final void processElement(ProcessContext processContext) {
 
         try {
-            processContext.output(transform(processContext.element()));
+            if(processContext.sideInput(Tags.argsView) != null)
+            {
+                processContext.output(transform(processContext.element(), processContext.sideInput(Tags.argsView)));
+            }
+            else {
+                processContext.output(transform(processContext.element()));
+            }
         }
         catch(Exception e){
 

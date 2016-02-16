@@ -2,8 +2,14 @@ package com.acacia.angleddream.common;
 
 import com.acacia.sdk.AbstractTransformComposer;
 import com.google.api.services.bigquery.model.TableRow;
+import com.google.cloud.dataflow.sdk.coders.Coder;
+import com.google.cloud.dataflow.sdk.coders.KvCoder;
+import com.google.cloud.dataflow.sdk.coders.StringUtf8Coder;
+import com.google.cloud.dataflow.sdk.values.KV;
+import com.google.cloud.dataflow.sdk.values.PCollectionView;
 import com.google.cloud.dataflow.sdk.values.TupleTag;
 
+import java.util.Map;
 import java.util.ServiceLoader;
 
 public class Tags {
@@ -13,6 +19,12 @@ public class Tags {
 
     public static final TupleTag<String> mainOutput = new TupleTag<String>("mainOutput"){};
     public static final TupleTag<String> errorOutput = new TupleTag<String>("errorOutput"){};
+
+    public static final Coder<KV<String, String>> MAP_CODER =
+            KvCoder.of(StringUtf8Coder.of(), StringUtf8Coder.of());
+
+
+    public static PCollectionView<Map<String, String>> argsView;
 
 
 

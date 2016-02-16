@@ -25,10 +25,15 @@ import com.google.cloud.dataflow.sdk.Pipeline;
 import com.google.cloud.dataflow.sdk.PipelineResult;
 import com.google.cloud.dataflow.sdk.io.BigQueryIO;
 import com.google.cloud.dataflow.sdk.io.PubsubIO;
+import com.google.cloud.dataflow.sdk.options.PipelineOptions;
 import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipeline;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipelineRunner;
+import com.google.cloud.dataflow.sdk.transforms.Create;
 import com.google.cloud.dataflow.sdk.transforms.ParDo;
+import com.google.cloud.dataflow.sdk.transforms.View;
+import com.google.cloud.dataflow.sdk.values.KV;
+import com.google.cloud.dataflow.sdk.values.PCollection;
 import com.google.cloud.dataflow.sdk.values.PCollectionTuple;
 import com.google.gson.Gson;
 
@@ -96,6 +101,16 @@ public class Main {
 
         }
 
+
+        Map<String, String> mapargs = new HashMap<>();
+        mapargs.putAll(containerIPs);
+
+        if(args != null){
+            PipelineOptions opts = PipelineOptionsFactory.create();
+            Pipeline p2 = Pipeline.create(opts);
+            PCollection<KV<String, String>> coll = p2.apply(Create.of(mapargs)).setCoder(Tags.MAP_CODER);
+            Tags.argsView  =  coll.apply(View.asMap());
+        }
 
         if (!outputTopics.isEmpty()) {
 
