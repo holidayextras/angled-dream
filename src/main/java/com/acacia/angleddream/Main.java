@@ -88,9 +88,9 @@ public class Main {
         Map<String, String> containerIPs = new HashMap<>();
 
         if(options.getContainerDeps() != null){
-            String[] deps = options.getContainerDeps().split("\\|");
+            String[] deps = options.getContainerDeps().split(",");
             for(String dep : deps){
-                String[] item = dep.split(",");
+                String[] item = dep.split("\\|");
                 containerIPs.put(item[0], item[1]);
             }
 
