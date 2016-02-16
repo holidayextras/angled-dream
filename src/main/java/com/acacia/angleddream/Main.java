@@ -109,7 +109,7 @@ public class Main {
             PipelineOptions opts = PipelineOptionsFactory.create();
             Pipeline p2 = Pipeline.create(opts);
             PCollection<KV<String, String>> coll = p2.apply(Create.of(mapargs)).setCoder(Tags.MAP_CODER);
-            Tags.argsView  =  coll.apply(View.asMap());
+            Tags.argsView  =  coll.apply("argsname", View.asMap());
         }
 
         if (!outputTopics.isEmpty()) {
