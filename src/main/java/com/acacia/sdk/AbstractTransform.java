@@ -45,7 +45,7 @@ public abstract class AbstractTransform extends DoFn<String,String> {
                 processContext.output(transform(processContext.element()));
             }
         }
-        catch(Exception e){
+        catch(GenericDataflowAppException e){
 
             //deserialize json
 
@@ -55,14 +55,15 @@ public abstract class AbstractTransform extends DoFn<String,String> {
 
             //add new error field, errordt
             hm.put("cause",e.getCause().getMessage());
+            hm.put("errortest", "why");
             hm.put("error", e.getMessage());
             hm.put("errortimestamp", Long.toString(System.currentTimeMillis()));
             String s = gson.toJson(hm);
 
-            LOG.debug(s);
+            LOG.debug("error: " + s);
 
             e.printStackTrace();
-            System.out.println("exception log: " + s);
+
 
 
             processContext.sideOutput(errorOutput, s );
