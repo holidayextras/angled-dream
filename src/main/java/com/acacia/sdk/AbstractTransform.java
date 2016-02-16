@@ -20,9 +20,13 @@ public abstract class AbstractTransform extends DoFn<String,String> {
     static final TupleTag<String> errorOutput = new TupleTag<String>("errorOutput"){};
 
     //function to transform a string, used by processElement
+
     public String transform(String input) throws GenericDataflowAppException {return input;}
 
+
+
     public String transform(String input, Map<String,String> args) throws GenericDataflowAppException {return input;}
+
 
     static final Gson gson = new Gson();
 
