@@ -21,6 +21,8 @@ public abstract class AbstractTransform extends DoFn<String,String> {
 
     //function to transform a string, used by processElement
 
+    public Map<String,String> args;
+
     public String transform(String input) throws GenericDataflowAppException {return input;}
 
 
@@ -35,9 +37,9 @@ public abstract class AbstractTransform extends DoFn<String,String> {
     public final void processElement(ProcessContext processContext) {
 
         try {
-            if(processContext.sideInput(Tags.argsView) != null)
+            if(args != null)
             {
-                processContext.output(transform(processContext.element(), processContext.sideInput(Tags.argsView)));
+                processContext.output(transform(processContext.element(), args));
             }
             else {
                 processContext.output(transform(processContext.element()));

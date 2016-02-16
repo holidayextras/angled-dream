@@ -26,10 +26,8 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollectionT
 
     private static final Logger LOG = LoggerFactory.getLogger(MultiTransform.class);
 
-    private static Map<String,String> args = null;
+    Map<String,String> args;
 
-    private static final Coder<KV<String, String>> TEST_CODER =
-            KvCoder.of(StringUtf8Coder.of(), StringUtf8Coder.of());
 
 
     Pipeline p = null;
@@ -40,13 +38,14 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollectionT
         transforms = loader.iterator();
 
     }
-    public MultiTransform(Map<String,String> args){
 
+    public MultiTransform(Map<String, String> args){
+        this.args = args;
         loader = ServiceLoader.load(AbstractTransformComposer.class);
         transforms = loader.iterator();
-        MultiTransform.args = args;
 
     }
+
 
 
     public MultiTransform(AbstractTransformComposer composer){
@@ -58,15 +57,16 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollectionT
 
     }
 
+    public MultiTransform(AbstractTransformComposer composer, Map<String, String> args){
 
-    public MultiTransform(AbstractTransformComposer composer, Map<String,String> args){
-
+        this.args = args;
         List<AbstractTransformComposer> composerList = new ArrayList<>();
         composerList.add(composer);
         transforms = composerList.iterator();
-        MultiTransform.args = args;
+
 
     }
+
 
     @Override
     public PCollectionTuple apply(PCollection<String> item) {
@@ -97,7 +97,7 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollectionT
 
                     if(Tags.argsView != null){
                         System.out.println("has args");
-                        results = tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).withSideInputs(Tags.argsView).of(t));
+                        results = tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(t));
                     }
                     else {
                         results = tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(t));

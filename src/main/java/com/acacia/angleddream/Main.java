@@ -29,6 +29,8 @@ import com.google.cloud.dataflow.sdk.options.PipelineOptions;
 import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipeline;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipelineRunner;
+import com.google.cloud.dataflow.sdk.testing.TestPipeline;
+import com.google.cloud.dataflow.sdk.transforms.Combine;
 import com.google.cloud.dataflow.sdk.transforms.Create;
 import com.google.cloud.dataflow.sdk.transforms.ParDo;
 import com.google.cloud.dataflow.sdk.transforms.View;
@@ -78,8 +80,8 @@ public class Main {
 
 
         //these are still needed even if they don't appear to do anything, because ServiceLoad is global.
-        ServiceLoader<AbstractTransformComposer> loader = null;
-        loader = ServiceLoader.load(AbstractTransformComposer.class, ClassLoader.getSystemClassLoader());
+//        ServiceLoader<AbstractTransformComposer> loader = null;
+//        loader = ServiceLoader.load(AbstractTransformComposer.class, ClassLoader.getSystemClassLoader());
 
 
         Pipeline pipeline = DataflowPipeline.create(options);
@@ -105,18 +107,20 @@ public class Main {
         Map<String, String> mapargs = new HashMap<>();
         mapargs.putAll(containerIPs);
 
-        if(args != null){
-            PipelineOptions opts = PipelineOptionsFactory.create();
-            Pipeline p2 = Pipeline.create(opts);
-            PCollection<KV<String, String>> coll = p2.apply(Create.of(mapargs)).setCoder(Tags.MAP_CODER);
-            Tags.argsView  =  coll.apply("argsname", View.asMap());
-        }
+//        if(args != null){
+//            PipelineOptions opts = PipelineOptionsFactory.create();
+//            Pipeline p2 = TestPipeline.create(opts);
+//
+//            PCollection<KV<String, String>> coll = p2.apply(Create.of(mapargs)).setCoder(Tags.MAP_CODER).setName("stepname");
+//            Tags.argsView  =  coll.apply("argsname", View.<String,String>asMap());
+//        }
+
 
         if (!outputTopics.isEmpty()) {
 
             try {
 
-                t = pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic())).apply(new MultiTransform());
+                t = pipeline.apply("pipename", PubsubIO.Read.topic(options.getPubsubTopic())).apply("pipename3",new MultiTransform(mapargs));
 
                 //how to abstract out -- make sure everything just returns a PCollection or PCollectionTuple?
 
