@@ -54,12 +54,16 @@ public abstract class AbstractTransform extends DoFn<String,String> {
                     (new HashMap<String, Object>()).getClass());
 
             //add new error field, errordt
+            hm.put("cause",e.getCause().getMessage());
             hm.put("error", e.getMessage());
             hm.put("errortimestamp", Long.toString(System.currentTimeMillis()));
             String s = gson.toJson(hm);
 
             LOG.debug(s);
+
+            e.printStackTrace();
             System.out.println("exception log: " + s);
+
 
             processContext.sideOutput(errorOutput, s );
         }
