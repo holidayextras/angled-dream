@@ -47,7 +47,7 @@ To avoid billing/deployment mishaps, there are no defaults. Flags not provided w
     
     --stagingLocation: google cloud storage bucket to upload jars and dependencies to
     --project: GCloud project name
-    --pubsubTopic: input topic for dataflow job
+    --pubsubTopic: comma-separated input topics for dataflow job
     --outputTopics: comma-separated pubsubs to output results to
     --maxNumWorkers: maximum number of workers on a job
     --numWorkers: initial number of workers on a job

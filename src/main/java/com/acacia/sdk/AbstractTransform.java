@@ -37,12 +37,24 @@ public abstract class AbstractTransform extends DoFn<String,String> {
     public final void processElement(ProcessContext processContext) {
 
         try {
-            if(args != null)
-            {
-                processContext.output(transform(processContext.element(), args));
+            if (processContext != null && processContext.element() != null){
+
+                if (args != null) {
+                    String result = transform(processContext.element(), args);
+                    if(result != null) {
+                        processContext.output(result);
+                    }
+                } else {
+                    String result = transform(processContext.element());
+                    if(result != null) {
+                        processContext.output(result);
+                    }
+                }
+
             }
-            else {
-                processContext.output(transform(processContext.element()));
+            else
+            {
+                throw new GenericDataflowAppException("null processcontext or element");
             }
         }
         catch(GenericDataflowAppException e){

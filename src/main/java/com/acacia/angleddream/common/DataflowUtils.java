@@ -97,12 +97,14 @@ public class DataflowUtils {
   public void setupPubsubTopics() throws IOException {
     PubsubTopicOptions pubsubTopicOptions = options.as(PubsubTopicOptions.class);
     if (!pubsubTopicOptions.getPubsubTopic().isEmpty()) {
-      pendingMessages.add("*******************Set Up Input Pubsub Topic*********************");
-      setupPubsubTopics(pubsubTopicOptions.getPubsubTopic());
+      for(String t : pubsubTopicOptions.getPubsubTopic().split(",")) {
 
+        pendingMessages.add("*******************Set Up Input Pubsub Topic*********************");
+        setupPubsubTopics(t);
+        pendingMessages.add("The Pub/Sub topic has been set up for this example: "
+                + t);
 
-      pendingMessages.add("The Pub/Sub topic has been set up for this example: "
-          + pubsubTopicOptions.getPubsubTopic());
+      }
     }
     PipelineComposerOptions pipelineComposerOptions = options.as(PipelineComposerOptions.class);
     if ((pipelineComposerOptions.getOutputTopics() != null) && !pipelineComposerOptions.getOutputTopics().isEmpty()) {
@@ -112,7 +114,7 @@ public class DataflowUtils {
         pendingMessages.add("*******************Set Up Output Pubsub Topics*********************");
         setupPubsubTopics(t);
         pendingMessages.add("The Pub/Sub topic has been set up for this example: "
-                + pubsubTopicOptions.getPubsubTopic());
+                + t);
       }
     }
     else{
