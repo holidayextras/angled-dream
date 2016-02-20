@@ -36,6 +36,7 @@ import com.google.cloud.dataflow.sdk.transforms.ParDo;
 import com.google.cloud.dataflow.sdk.transforms.View;
 import com.google.cloud.dataflow.sdk.values.KV;
 import com.google.cloud.dataflow.sdk.values.PCollection;
+import com.google.cloud.dataflow.sdk.values.PCollectionList;
 import com.google.cloud.dataflow.sdk.values.PCollectionTuple;
 import com.google.gson.Gson;
 
@@ -62,11 +63,6 @@ public class Main {
         options.setStreaming(true);
         options.setRunner(DataflowPipelineRunner.class);
 
-
-        //don't do this because we need to avoid collisions in case a job is manually cancelled
-        //options.setJobName(options.getPipelineName());
-
-
         List<String> outputTopics = new ArrayList<>();
 
 
@@ -74,29 +70,16 @@ public class Main {
             outputTopics = Arrays.asList(options.getOutputTopics().split(","));
         }
 
-
         DataflowUtils dataflowUtils = new DataflowUtils(options);
         dataflowUtils.setup();
 
-
-        //these are still needed even if they don't appear to do anything, because ServiceLoad is global.
-//        ServiceLoader<AbstractTransformComposer> loader = null;
-//        loader = ServiceLoader.load(AbstractTransformComposer.class, ClassLoader.getSystemClassLoader());
-
-
         Pipeline pipeline = DataflowPipeline.create(options);
-
-        //need to support more than ParDo.of in SDK
-
-        //need to check for proper things in classpath etc so people don't try to run w/ 0 pipelines
-
-        PCollectionTuple t = null;
 
         Map<String, String> containerIPs = new HashMap<>();
 
-        if(options.getContainerDeps() != null){
+        if (options.getContainerDeps() != null) {
             String[] deps = options.getContainerDeps().split(",");
-            for(String dep : deps){
+            for (String dep : deps) {
                 String[] item = dep.split("\\|");
                 containerIPs.put(item[0], item[1]);
             }
@@ -107,39 +90,43 @@ public class Main {
         Map<String, String> mapargs = new HashMap<>();
         mapargs.putAll(containerIPs);
 
-//        if(args != null){
-//            PipelineOptions opts = PipelineOptionsFactory.create();
-//            Pipeline p2 = TestPipeline.create(opts);
-//
-//            PCollection<KV<String, String>> coll = p2.apply(Create.of(mapargs)).setCoder(Tags.MAP_CODER).setName("stepname");
-//            Tags.argsView  =  coll.apply("argsname", View.<String,String>asMap());
-//        }
+        MultiTransform mt = new MultiTransform(mapargs);
+        //List<PCollectionTuple> tuples = new ArrayList<>();
+        PCollectionTuple t = PCollectionTuple.empty(pipeline);
+
+
+        if (options.getPubsubTopic() != null) {
+            List<String> inputs = Arrays.asList();
+
+
+               t = pipeline.apply(PubsubIO.Read.idLabel(UUID.randomUUID().toString()).named("read-" + options.getPubsubTopic()).topic(options.getPubsubTopic())).apply(mt);
+
+
+        } else {
+            //do batch stuff delete this
+               t = pipeline.apply(PubsubIO.Read.idLabel(UUID.randomUUID().toString()).named("read-" + options.getPubsubTopic()).topic(options.getPubsubTopic())).apply(mt);
+        }
 
 
         if (!outputTopics.isEmpty()) {
 
-            try {
 
-                t = pipeline.apply("pipename", PubsubIO.Read.topic(options.getPubsubTopic())).apply("pipename3",new MultiTransform(mapargs));
 
-                //how to abstract out -- make sure everything just returns a PCollection or PCollectionTuple?
+                try {
 
-                if (t.get(Tags.mainOutput) != null) {
+                    if (t.get(Tags.mainOutput) != null) {
 
-                    for (String topic : outputTopics) {
-                        t.get(Tags.mainOutput).apply(PubsubIO.Write.topic(topic));
-
+                        for (String topic : outputTopics) {
+                            t.get(Tags.mainOutput).apply(PubsubIO.Write.topic(topic));
+                        }
+                    }
+                    if (t.get(Tags.errorOutput) != null) {
+                        t.get(Tags.errorOutput).apply(PubsubIO.Write.topic(options.getErrorPipelineName()));
                     }
 
+                } catch (NullPointerException e) {
+                    System.out.println("Exception: make sure PubsubTopic is not empty, and pipeline JAR file is on classpath, correctly named, correctly built, and in the correct bucket");
                 }
-
-                if (t.get(Tags.errorOutput) != null) {
-                    t.get(Tags.errorOutput).apply(PubsubIO.Write.topic(options.getErrorPipelineName()));
-                }
-
-            } catch (NullPointerException e) {
-                System.out.println("Exception: make sure PubsubTopic is not empty, and pipeline JAR file is on classpath, correctly named, correctly built, and in the correct bucket");
-            }
 
         }
 
