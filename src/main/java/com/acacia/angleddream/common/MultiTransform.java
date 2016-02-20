@@ -87,11 +87,9 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollectionT
 
         while (transforms.hasNext()) {
 
-            AbstractTransformComposer f =  transforms.next();
+            AbstractTransformComposer t =  transforms.next();
 
-            if(f.getOrderedTransforms() != null) {
-
-                for (AbstractTransform t : f.getOrderedTransforms()) {
+                t.args = args;
 
                     //t.errorOutput = Tags.errorOutput; //this is weird but you gotta do it because CDF uses object identity to emit to tuple tags  https://cloud.google.com/dataflow/model/multiple-pcollections#Heterogenous
 
@@ -103,9 +101,8 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollectionT
                         results = tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(t));
                     }
 
-                    //           tmp = tmp.apply(ParDo.named(tmp.getName()).of(t));
-                }
-            }
+
+
         }
 
         return results;

@@ -12,16 +12,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public abstract class AbstractTransform extends DoFn<String,String> {
+public abstract class AbstractTransform  {
 
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractTransform.class.getName());
 
-    static final TupleTag<String> errorOutput = new TupleTag<String>("errorOutput"){};
 
     //function to transform a string, used by processElement
 
-    public Map<String,String> args;
+
 
     public String transform(String input) throws GenericDataflowAppException {return input;}
 
@@ -30,56 +28,8 @@ public abstract class AbstractTransform extends DoFn<String,String> {
     public String transform(String input, Map<String,String> args) throws GenericDataflowAppException {return input;}
 
 
-    static final Gson gson = new Gson();
-
-
-    @Override
-    public final void processElement(ProcessContext processContext) {
-
-        try {
-            if (processContext != null && processContext.element() != null){
-
-                if (args != null) {
-                    String result = transform(processContext.element(), args);
-                    if(result != null) {
-                        processContext.output(result);
-                    }
-                } else {
-                    String result = transform(processContext.element());
-                    if(result != null) {
-                        processContext.output(result);
-                    }
-                }
-
-            }
-            else
-            {
-                throw new GenericDataflowAppException("null processcontext or element");
-            }
-        }
-        catch(GenericDataflowAppException e){
-
-            //deserialize json
-
-            Map<String, Object> hm = gson.<Map<String, Object>>fromJson(
-                    processContext.element(),
-                    (new HashMap<String, Object>()).getClass());
-
-            //add new error field, errordt
-            hm.put("cause",e.getCause().getMessage());
-            hm.put("errortest", "why");
-            hm.put("error", e.getMessage());
-            hm.put("errortimestamp", Long.toString(System.currentTimeMillis()));
-            String s = gson.toJson(hm);
-
-            LOG.debug("error: " + s);
-
-            e.printStackTrace();
 
 
 
-            processContext.sideOutput(errorOutput, s );
-        }
 
-    }
 }
