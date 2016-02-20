@@ -38,6 +38,7 @@ import com.google.cloud.dataflow.sdk.values.KV;
 import com.google.cloud.dataflow.sdk.values.PCollection;
 import com.google.cloud.dataflow.sdk.values.PCollectionTuple;
 import com.google.gson.Gson;
+import org.python.antlr.op.Mult;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -116,11 +117,13 @@ public class Main {
 //        }
 
 
+        MultiTransform mt = new MultiTransform(mapargs);
+
         if (!outputTopics.isEmpty()) {
 
             try {
 
-                t = pipeline.apply("pipename", PubsubIO.Read.topic(options.getPubsubTopic())).apply("pipename3",new MultiTransform(mapargs));
+                t = pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic())).apply(mt);
 
                 //how to abstract out -- make sure everything just returns a PCollection or PCollectionTuple?
 
