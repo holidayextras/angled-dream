@@ -6,6 +6,7 @@ import com.google.cloud.dataflow.sdk.values.TupleTag;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,11 @@ public abstract class AbstractTransformComposer extends DoFn<String,String> {
                 }
 
                 if (item != null && !item.equals("")) {
+
+                    //rehash
+                    Map<String, Object> hm = gson.<Map<String, Object>>fromJson(item, (new HashMap<String, Object>()).getClass());
+                    Map<String, Object> resource = (Map<String, Object>) hm.get("resource");
+                    hm.put("resource_hash", DigestUtils.md5Hex(gson.toJson(resource)));
 
                     LOG.info("item output: " + item);
                     processContext.output(item);
