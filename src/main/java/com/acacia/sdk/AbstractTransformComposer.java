@@ -45,8 +45,9 @@ public abstract class AbstractTransformComposer extends DoFn<String,String> {
                     }
                 }
 
-                if (item != null) {
+                if (item != null && !item.equals("")) {
 
+                    LOG.info("item output: " + item);
                     processContext.output(item);
                 }
 
