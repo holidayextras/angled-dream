@@ -68,13 +68,11 @@ public abstract class AbstractTransformComposer extends DoFn<String,String> {
                     (new HashMap<String, Object>()).getClass());
 
             //add new error field, errordt
-            hm.put("cause",e.getCause().getMessage());
-            hm.put("errortest", "why");
             hm.put("error", e.getMessage());
             hm.put("errortimestamp", Long.toString(System.currentTimeMillis()));
             String s = gson.toJson(hm);
 
-            LOG.debug("error: " + s);
+            LOG.info("error: " + s);
 
             e.printStackTrace();
 
