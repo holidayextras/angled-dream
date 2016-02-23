@@ -37,6 +37,7 @@ import com.google.cloud.dataflow.sdk.transforms.View;
 import com.google.cloud.dataflow.sdk.values.KV;
 import com.google.cloud.dataflow.sdk.values.PCollection;
 import com.google.cloud.dataflow.sdk.values.PCollectionTuple;
+import com.google.cloud.dataflow.sdk.values.TupleTagList;
 import com.google.gson.Gson;
 import org.python.antlr.op.Mult;
 
@@ -48,6 +49,10 @@ import java.util.*;
 public class Main {
 
 
+    private static ServiceLoader<AbstractTransformComposer> loader;
+
+    private static Iterator<AbstractTransformComposer> transforms;
+
     /**
      * Sets up and starts streaming pipeline.
      * <*
@@ -55,6 +60,8 @@ public class Main {
      * @throws IOException if there is a problem setting up resources
      */
     public static void main(String[] args) throws IOException {
+
+
 
 
         ComposerManagerOptions options = PipelineOptionsFactory.fromArgs(args)
@@ -91,6 +98,9 @@ public class Main {
 
         //need to check for proper things in classpath etc so people don't try to run w/ 0 pipelines
 
+
+
+
         PCollectionTuple t = null;
 
         Map<String, String> containerIPs = new HashMap<>();
@@ -123,29 +133,56 @@ public class Main {
 
             try {
 
-                t = pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic())).apply(mt);
+                PCollection<String> inp = pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()));
 
-                //how to abstract out -- make sure everything just returns a PCollection or PCollectionTuple?
+                loader = ServiceLoader.load(AbstractTransformComposer.class);
+                transforms = loader.iterator();
 
-                if (t.get(Tags.mainOutput) != null) {
+                PCollection<String> tmp = inp;
 
-                    for (String topic : outputTopics) {
-                        t.get(Tags.mainOutput).apply(PubsubIO.Write.topic(topic));
 
+                List<PCollectionTuple> tups = new ArrayList<>();
+
+                while (transforms.hasNext()) {
+
+                    AbstractTransformComposer tr = transforms.next();
+
+                    tr.args = mapargs;
+
+                    //t.errorOutput = Tags.errorOutput; //this is weird but you gotta do it because CDF uses object identity to emit to tuple tags  https://cloud.google.com/dataflow/model/multiple-pcollections#Heterogenous
+
+                    if (Tags.argsView != null) {
+                        System.out.println("has args");
+                        tups.add(tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(tr)));
+                    } else {
+                        tups.add(tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(tr)));
                     }
+
 
                 }
 
-                if (t.get(Tags.errorOutput) != null) {
-                    t.get(Tags.errorOutput).apply(PubsubIO.Write.topic(options.getErrorPipelineName()));
+                //how to abstract out -- make sure everything just returns a PCollection or PCollectionTuple?
+
+                for (PCollectionTuple tup : tups) {
+
+                    if (tup.get(Tags.mainOutput) != null) {
+
+                        for (String topic : outputTopics) {
+                            tup.get(Tags.mainOutput).apply(PubsubIO.Write.topic(topic));
+
+                        }
+                    }
+
+                    if (tup.get(Tags.errorOutput) != null) {
+                        tup.get(Tags.errorOutput).apply(PubsubIO.Write.topic(options.getErrorPipelineName()));
+                    }
+
                 }
 
             } catch (NullPointerException e) {
                 System.out.println("Exception: make sure PubsubTopic is not empty, and pipeline JAR file is on classpath, correctly named, correctly built, and in the correct bucket");
             }
-
         }
-
 
         if (options.getBigQueryTable() != null) {
 

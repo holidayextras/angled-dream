@@ -72,9 +72,9 @@ public class MultiTransform extends PTransform<PCollection<String>, PCollectionT
     public PCollectionTuple apply(PCollection<String> item) {
 
         //do these here because deserialization?
-        loader = ServiceLoader.load(AbstractTransformComposer.class);
-
-        transforms = loader.iterator();
+//        loader = ServiceLoader.load(AbstractTransformComposer.class);
+//
+//        transforms = loader.iterator();
 
         PCollection<String> tmp = item;
         PCollectionTuple results = null;

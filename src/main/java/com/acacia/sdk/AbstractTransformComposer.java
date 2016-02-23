@@ -36,7 +36,7 @@ public abstract class AbstractTransformComposer extends DoFn<String,String> {
 
 
                 String item = processContext.element();
-                String original = processContext.element();
+
 
                 for(AbstractTransform transform : getOrderedTransforms()) {
 
@@ -83,9 +83,6 @@ public abstract class AbstractTransformComposer extends DoFn<String,String> {
             LOG.info("error: " + s);
 
             e.printStackTrace();
-
-
-
             processContext.sideOutput(errorOutput, s );
         }
 
