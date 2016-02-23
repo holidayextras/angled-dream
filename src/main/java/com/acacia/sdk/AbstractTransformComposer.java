@@ -34,8 +34,9 @@ public abstract class AbstractTransformComposer extends DoFn<String,String> {
         try {
             if (processContext != null && processContext.element() != null){
 
-                String item = processContext.element();
 
+                String item = processContext.element();
+                String original = processContext.element();
 
                 for(AbstractTransform transform : getOrderedTransforms()) {
 
@@ -52,9 +53,10 @@ public abstract class AbstractTransformComposer extends DoFn<String,String> {
                     Map<String, Object> hm = gson.<Map<String, Object>>fromJson(item, (new HashMap<String, Object>()).getClass());
                     Map<String, Object> resource = (Map<String, Object>) hm.get("resource");
                     hm.put("resource_hash", DigestUtils.md5Hex(gson.toJson(resource)));
+                    String output = gson.toJson(hm);
 
-                    LOG.info("item output: " + item);
-                    processContext.output(item);
+                    LOG.info("item output: " + output);
+                    processContext.output(output);
                 }
 
 
