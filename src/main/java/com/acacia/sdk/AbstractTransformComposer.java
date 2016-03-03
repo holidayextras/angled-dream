@@ -50,13 +50,42 @@ public abstract class AbstractTransformComposer extends DoFn<String,String> {
                 if (item != null && !item.equals("")) {
 
                     //rehash
-                    Map<String, Object> hm = gson.<Map<String, Object>>fromJson(item, (new HashMap<String, Object>()).getClass());
-                    Map<String, Object> resource = (Map<String, Object>) hm.get("resource");
-                    hm.put("resource_hash", DigestUtils.md5Hex(gson.toJson(resource)));
-                    String output = gson.toJson(hm);
 
-                    LOG.info("item output: " + output);
-                    processContext.output(output);
+
+                    Map<String, Object> hm = gson.<Map<String, Object>>fromJson(item, (new HashMap<String, Object>()).getClass());
+
+
+                    Object resource =  hm.get("resource");
+
+
+                    if(resource instanceof List ){
+
+                        List<Map<String,Object>> items = (List<Map<String,Object>>) resource;
+                        for(Map<String, Object> m : items){
+
+                            Map<String, Object> out = new HashMap<>();
+                            out.putAll(hm);
+
+                            out.put("resource_hash", DigestUtils.md5Hex(gson.toJson(m)));
+                            String output = gson.toJson(out);
+                            LOG.info("item output: " + output);
+                            processContext.output(output);
+
+                        }
+
+                    }
+                    else
+                    {
+
+                        hm.put("resource_hash", DigestUtils.md5Hex(gson.toJson(resource)));
+                        String output = gson.toJson(hm);
+                        LOG.info("item output: " + output);
+                        processContext.output(output);
+
+                    }
+
+
+
                 }
 
 
