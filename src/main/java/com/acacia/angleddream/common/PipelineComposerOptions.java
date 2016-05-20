@@ -22,6 +22,12 @@ public interface PipelineComposerOptions extends PipelineOptions{
     String getPipelineName();
     void setPipelineName(String pipelineName);
 
+    @Description("Jar file hashes")
+    @Default.String("no-hashes")
+    String getStringHashes();
+    void setStringHashes(String stringHashes);
+
+
 
     @Description("Error Pipeline Name")
     @Default.String("error-unnamed-pipeline")

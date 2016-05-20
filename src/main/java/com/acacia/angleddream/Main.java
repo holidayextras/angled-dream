@@ -82,6 +82,7 @@ public class Main {
             outputTopics = Arrays.asList(options.getOutputTopics().split(","));
         }
 
+        System.out.println("Jar file hashes: " + options.getStringHashes());
 
         DataflowUtils dataflowUtils = new DataflowUtils(options);
         dataflowUtils.setup();
