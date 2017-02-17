@@ -23,7 +23,7 @@
   <groupId>com.acacia</groupId>
   <artifactId>angleddream</artifactId>
 
-  <version>0.1-ALPHA</version>
+  <version>0.2-ALPHA</version>
 
   <packaging>jar</packaging>
 
@@ -122,13 +122,13 @@
     <dependency>
       <groupId>com.google.cloud.dataflow</groupId>
       <artifactId>google-cloud-dataflow-java-sdk-all</artifactId>
-      <version>1.3.0</version>
+      <version>1.9.0</version>
     </dependency>
 
     <dependency>
       <groupId>com.google.cloud.dataflow</groupId>
       <artifactId>google-cloud-dataflow-java-examples-all</artifactId>
-      <version>1.3.0</version>
+      <version>1.9.0</version>
       <exclusions>
         <exclusion>
           <artifactId>httpclient</artifactId>
