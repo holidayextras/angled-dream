@@ -76,10 +76,15 @@ public class Main {
 
 
         List<String> outputTopics = new ArrayList<>();
+        List<String> inputTopics = new ArrayList<>();
 
 
         if (options.getOutputTopics() != null) {
             outputTopics = Arrays.asList(options.getOutputTopics().split(","));
+        }
+
+        if (options.getPubsubTopic() != null) {
+            inputTopics = Arrays.asList(options.getPubsubTopic().split(","));
         }
 
         System.out.println("Jar file hashes: " + options.getStringHashes());
@@ -132,56 +137,58 @@ public class Main {
 
         if (!outputTopics.isEmpty()) {
 
-            try {
+            for(String inputTopic: inputTopics) {
+                try {
 
-                PCollection<String> inp = pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()));
+                    PCollection<String> inp = pipeline.apply(PubsubIO.Read.topic(inputTopic));
 
-                loader = ServiceLoader.load(AbstractTransformComposer.class);
-                transforms = loader.iterator();
+                    loader = ServiceLoader.load(AbstractTransformComposer.class);
+                    transforms = loader.iterator();
 
-                PCollection<String> tmp = inp;
-
-
-                List<PCollectionTuple> tups = new ArrayList<>();
-
-                while (transforms.hasNext()) {
-
-                    AbstractTransformComposer tr = transforms.next();
-
-                    tr.args = mapargs;
-
-                    //t.errorOutput = Tags.errorOutput; //this is weird but you gotta do it because CDF uses object identity to emit to tuple tags  https://cloud.google.com/dataflow/model/multiple-pcollections#Heterogenous
-
-                    if (Tags.argsView != null) {
-                        System.out.println("has args");
-                        tups.add(tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(tr)));
-                    } else {
-                        tups.add(tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(tr)));
-                    }
+                    PCollection<String> tmp = inp;
 
 
-                }
+                    List<PCollectionTuple> tups = new ArrayList<>();
 
-                //how to abstract out -- make sure everything just returns a PCollection or PCollectionTuple?
+                    while (transforms.hasNext()) {
 
-                for (PCollectionTuple tup : tups) {
+                        AbstractTransformComposer tr = transforms.next();
 
-                    if (tup.get(Tags.mainOutput) != null) {
+                        tr.args = mapargs;
 
-                        for (String topic : outputTopics) {
-                            tup.get(Tags.mainOutput).apply(PubsubIO.Write.topic(topic));
+                        //t.errorOutput = Tags.errorOutput; //this is weird but you gotta do it because CDF uses object identity to emit to tuple tags  https://cloud.google.com/dataflow/model/multiple-pcollections#Heterogenous
 
+                        if (Tags.argsView != null) {
+                            System.out.println("has args");
+                            tups.add(tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(tr)));
+                        } else {
+                            tups.add(tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(tr)));
                         }
+
+
                     }
 
-                    if (tup.get(Tags.errorOutput) != null) {
-                        tup.get(Tags.errorOutput).apply(PubsubIO.Write.topic(options.getErrorPipelineName()));
+                    //how to abstract out -- make sure everything just returns a PCollection or PCollectionTuple?
+
+                    for (PCollectionTuple tup : tups) {
+
+                        if (tup.get(Tags.mainOutput) != null) {
+
+                            for (String topic : outputTopics) {
+                                tup.get(Tags.mainOutput).apply(PubsubIO.Write.topic(topic));
+
+                            }
+                        }
+
+                        if (tup.get(Tags.errorOutput) != null) {
+                            tup.get(Tags.errorOutput).apply(PubsubIO.Write.topic(options.getErrorPipelineName()));
+                        }
+
                     }
 
+                } catch (NullPointerException e) {
+                    System.out.println("Exception: make sure PubsubTopic is not empty, and pipeline JAR file is on classpath, correctly named, correctly built, and in the correct bucket");
                 }
-
-            } catch (NullPointerException e) {
-                System.out.println("Exception: make sure PubsubTopic is not empty, and pipeline JAR file is on classpath, correctly named, correctly built, and in the correct bucket");
             }
         }
 
