@@ -131,7 +131,6 @@ public class Main {
 
         if (!outputTopics.isEmpty()) {
 
-            PCollectionList<String> pcl = PCollectionList.<String>empty(pipeline);
             List<PCollection<String>> pcs = new ArrayList<>();
             try {
 
@@ -139,7 +138,7 @@ public class Main {
                     pcs.add(pipeline.apply(PubsubIO.Read.topic(inputTopic)));
                 }
 
-                pcl.of(pcs);
+                PCollectionList<String> pcl = PCollectionList.of(pcs);
 
                 PCollection<String> inp = pcl.apply(Flatten.<String>pCollections());
 
