@@ -133,10 +133,11 @@ public class Main {
 
             PCollectionList<String> pcl = PCollectionList.<String>empty(pipeline);
             List<PCollection<String>> pcs = new ArrayList<>();
-            for(String inputTopic: inputTopics) {
-                pcs.add(pipeline.apply(PubsubIO.Read.topic(inputTopic)));
-            }
             try {
+
+                for(String inputTopic: inputTopics) {
+                    pcs.add(pipeline.apply(PubsubIO.Read.topic(inputTopic)));
+                }
 
                 pcl.of(pcs);
 
