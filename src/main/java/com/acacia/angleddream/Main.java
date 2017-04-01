@@ -132,10 +132,13 @@ public class Main {
         if (!outputTopics.isEmpty()) {
 
             PCollectionList<String> pcl = PCollectionList.<String>empty(pipeline);
+            List<PCollection<String>> pcs = new ArrayList<>();
             for(String inputTopic: inputTopics) {
-                pcl.of(pipeline.apply(PubsubIO.Read.topic(inputTopic)));
+                pcs.add(pipeline.apply(PubsubIO.Read.topic(inputTopic)));
             }
             try {
+
+                pcl.of(pcs);
 
                 PCollection<String> inp = pcl.apply(Flatten.<String>pCollections());
 
