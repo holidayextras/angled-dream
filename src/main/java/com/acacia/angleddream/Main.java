@@ -30,14 +30,8 @@ import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipeline;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipelineRunner;
 import com.google.cloud.dataflow.sdk.testing.TestPipeline;
-import com.google.cloud.dataflow.sdk.transforms.Combine;
-import com.google.cloud.dataflow.sdk.transforms.Create;
-import com.google.cloud.dataflow.sdk.transforms.ParDo;
-import com.google.cloud.dataflow.sdk.transforms.View;
-import com.google.cloud.dataflow.sdk.values.KV;
-import com.google.cloud.dataflow.sdk.values.PCollection;
-import com.google.cloud.dataflow.sdk.values.PCollectionTuple;
-import com.google.cloud.dataflow.sdk.values.TupleTagList;
+import com.google.cloud.dataflow.sdk.transforms.*;
+import com.google.cloud.dataflow.sdk.values.*;
 import com.google.gson.Gson;
 import org.python.antlr.op.Mult;
 
@@ -137,58 +131,60 @@ public class Main {
 
         if (!outputTopics.isEmpty()) {
 
+            PCollectionList<String> pcl = PCollectionList.<String>empty(pipeline);
             for(String inputTopic: inputTopics) {
-                try {
+                pcl.of(pipeline.apply(PubsubIO.Read.topic(inputTopic)));
+            }
+            try {
 
-                    PCollection<String> inp = pipeline.apply(PubsubIO.Read.topic(inputTopic));
+                PCollection<String> inp = pcl.apply(Flatten.<String>pCollections());
 
-                    loader = ServiceLoader.load(AbstractTransformComposer.class);
-                    transforms = loader.iterator();
+                loader = ServiceLoader.load(AbstractTransformComposer.class);
+                transforms = loader.iterator();
 
-                    PCollection<String> tmp = inp;
-
-
-                    List<PCollectionTuple> tups = new ArrayList<>();
-
-                    while (transforms.hasNext()) {
-
-                        AbstractTransformComposer tr = transforms.next();
-
-                        tr.args = mapargs;
-
-                        //t.errorOutput = Tags.errorOutput; //this is weird but you gotta do it because CDF uses object identity to emit to tuple tags  https://cloud.google.com/dataflow/model/multiple-pcollections#Heterogenous
-
-                        if (Tags.argsView != null) {
-                            System.out.println("has args");
-                            tups.add(tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(tr)));
-                        } else {
-                            tups.add(tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(tr)));
-                        }
+                PCollection<String> tmp = inp;
 
 
+                List<PCollectionTuple> tups = new ArrayList<>();
+
+                while (transforms.hasNext()) {
+
+                    AbstractTransformComposer tr = transforms.next();
+
+                    tr.args = mapargs;
+
+                    //t.errorOutput = Tags.errorOutput; //this is weird but you gotta do it because CDF uses object identity to emit to tuple tags  https://cloud.google.com/dataflow/model/multiple-pcollections#Heterogenous
+
+                    if (Tags.argsView != null) {
+                        System.out.println("has args");
+                        tups.add(tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(tr)));
+                    } else {
+                        tups.add(tmp.apply(ParDo.named(tmp.getName()).withOutputTags(Tags.mainOutput, TupleTagList.of(Tags.errorOutput)).of(tr)));
                     }
 
-                    //how to abstract out -- make sure everything just returns a PCollection or PCollectionTuple?
 
-                    for (PCollectionTuple tup : tups) {
-
-                        if (tup.get(Tags.mainOutput) != null) {
-
-                            for (String topic : outputTopics) {
-                                tup.get(Tags.mainOutput).apply(PubsubIO.Write.topic(topic));
-
-                            }
-                        }
-
-                        if (tup.get(Tags.errorOutput) != null) {
-                            tup.get(Tags.errorOutput).apply(PubsubIO.Write.topic(options.getErrorPipelineName()));
-                        }
-
-                    }
-
-                } catch (NullPointerException e) {
-                    System.out.println("Exception: make sure PubsubTopic is not empty, and pipeline JAR file is on classpath, correctly named, correctly built, and in the correct bucket");
                 }
+
+                //how to abstract out -- make sure everything just returns a PCollection or PCollectionTuple?
+
+                for (PCollectionTuple tup : tups) {
+
+                    if (tup.get(Tags.mainOutput) != null) {
+
+                        for (String topic : outputTopics) {
+                            tup.get(Tags.mainOutput).apply(PubsubIO.Write.topic(topic));
+
+                        }
+                    }
+
+                    if (tup.get(Tags.errorOutput) != null) {
+                        tup.get(Tags.errorOutput).apply(PubsubIO.Write.topic(options.getErrorPipelineName()));
+                    }
+
+                }
+
+            } catch (NullPointerException e) {
+                System.out.println("Exception: make sure PubsubTopic is not empty, and pipeline JAR file is on classpath, correctly named, correctly built, and in the correct bucket");
             }
         }
 
