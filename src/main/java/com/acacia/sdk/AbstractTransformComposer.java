@@ -67,6 +67,7 @@ public abstract class AbstractTransformComposer extends DoFn<String,String> {
                             out.putAll(hm);
 
                             out.put("resource_hash", DigestUtils.md5Hex(gson.toJson(m)));
+                            out.put("resource", m);
                             String output = gson.toJson(out);
                             LOG.info("item output: " + output);
                             processContext.output(output);
