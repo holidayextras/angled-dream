@@ -30,14 +30,8 @@ import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipeline;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipelineRunner;
 import com.google.cloud.dataflow.sdk.testing.TestPipeline;
-import com.google.cloud.dataflow.sdk.transforms.Combine;
-import com.google.cloud.dataflow.sdk.transforms.Create;
-import com.google.cloud.dataflow.sdk.transforms.ParDo;
-import com.google.cloud.dataflow.sdk.transforms.View;
-import com.google.cloud.dataflow.sdk.values.KV;
-import com.google.cloud.dataflow.sdk.values.PCollection;
-import com.google.cloud.dataflow.sdk.values.PCollectionTuple;
-import com.google.cloud.dataflow.sdk.values.TupleTagList;
+import com.google.cloud.dataflow.sdk.transforms.*;
+import com.google.cloud.dataflow.sdk.values.*;
 import com.google.gson.Gson;
 import org.python.antlr.op.Mult;
 
@@ -76,10 +70,15 @@ public class Main {
 
 
         List<String> outputTopics = new ArrayList<>();
+        List<String> inputTopics = new ArrayList<>();
 
 
         if (options.getOutputTopics() != null) {
             outputTopics = Arrays.asList(options.getOutputTopics().split(","));
+        }
+
+        if (options.getPubsubTopic() != null) {
+            inputTopics = Arrays.asList(options.getPubsubTopic().split(","));
         }
 
         System.out.println("Jar file hashes: " + options.getStringHashes());
@@ -132,9 +131,16 @@ public class Main {
 
         if (!outputTopics.isEmpty()) {
 
+            List<PCollection<String>> pcs = new ArrayList<>();
             try {
 
-                PCollection<String> inp = pipeline.apply(PubsubIO.Read.topic(options.getPubsubTopic()));
+                for(String inputTopic: inputTopics) {
+                    pcs.add(pipeline.apply(PubsubIO.Read.topic(inputTopic)));
+                }
+
+                PCollectionList<String> pcl = PCollectionList.of(pcs);
+
+                PCollection<String> inp = pcl.apply(Flatten.<String>pCollections());
 
                 loader = ServiceLoader.load(AbstractTransformComposer.class);
                 transforms = loader.iterator();
