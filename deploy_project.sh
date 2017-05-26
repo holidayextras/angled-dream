@@ -14,12 +14,12 @@ PROJECT="hx-trial"
 if [ -n "$1" ]; then
   if [ $1 == "STAGING" ]; then
     PROJECT="hx-data-staging"
-    NEXT_PROJECT=$NEXT_PROJECT_STAGING
+    NEXT_PROJECT=$NEXT_PROJECT-$1
     CIRCLE_TOKEN=$CIRCLE_TOKEN_STAGING
   fi
   if [ $1 == "PRODUCTION" ]; then
     PROJECT="hx-data-production"
-    NEXT_PROJECT=$NEXT_PROJECT_PRODUCTION
+    NEXT_PROJECT=$NEXT_PROJECT-$1
     CIRCLE_TOKEN=$CIRCLE_TOKEN_PRODUCTION
   fi
 fi
