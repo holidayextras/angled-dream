@@ -4,6 +4,7 @@ package com.acacia.sdk;
 import com.google.cloud.dataflow.sdk.transforms.DoFn;
 import com.google.cloud.dataflow.sdk.values.TupleTag;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -26,7 +27,7 @@ public abstract class AbstractTransformComposer extends DoFn<String,String> {
 
     static final TupleTag<String> errorOutput = new TupleTag<String>("errorOutput"){};
 
-    static final Gson gson = new Gson();
+    static final Gson gson = new GsonBuilder().serializeNulls().create();
 
     @Override
     public final void processElement(ProcessContext processContext) {
