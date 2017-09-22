@@ -23,7 +23,7 @@
   <groupId>com.acacia</groupId>
   <artifactId>angleddream</artifactId>
 
-  <version>0.4-ALPHA</version>
+  <version>0.4.1-ALPHA</version>
 
   <packaging>jar</packaging>
 
@@ -190,7 +190,7 @@
     <dependency>
       <groupId>org.python</groupId>
       <artifactId>jython-standalone</artifactId>
-      <version>2.7.1b2</version>
+      <version>2.7.1</version>
     </dependency>
 
 
